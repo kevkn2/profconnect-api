@@ -1,0 +1,58 @@
+package main
+
+import (
+	"log"
+
+	"profconnect-api/internal/adapter/database"
+	"profconnect-api/internal/adapter/handler"
+	"profconnect-api/internal/adapter/routes"
+	"profconnect-api/internal/config"
+	"profconnect-api/internal/database/sqlc/generated"
+	"profconnect-api/internal/infrastructure/adapter/repository"
+	"profconnect-api/internal/usecase"
+
+	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
+)
+
+func main() {
+	// Load configuration
+	dbConfig := config.LoadConfig()
+
+	// Connect to database
+	db, err := database.Connect(dbConfig)
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	// Initialize SQLC queries
+	queries := generated.New(db)
+
+	// Initialize repositories (infrastructure adapters)
+	userRepository := repository.NewUserRepository(queries)
+
+	// Initialize use cases
+	registerUsecase := usecase.NewRegisterUsecase(userRepository)
+	loginUsecase := usecase.NewLoginUseCase(userRepository)
+
+	// Initialize handlers (presentation adapters)
+	h := handler.NewHandler(registerUsecase, loginUsecase)
+
+	// Initialize Fiber app
+	app := fiber.New()
+
+	// Enable CORS middleware
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"http://localhost:3000"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
+		AllowHeaders: []string{"Content-Type", "Authorization"},
+	}))
+
+	// Initialize router and register routes
+	router := routes.NewRouter(app, h)
+	router.RegisterGeneralRoutes()
+
+	// Start the server on port 3000
+	app.Listen(":3001")
+}
