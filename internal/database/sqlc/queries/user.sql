@@ -2,7 +2,7 @@
 SELECT id, name, email, role FROM users WHERE id = $1;
 
 -- name: GetUserByEmail :one
-SELECT id, name, email,  role FROM users WHERE email = $1;
+SELECT id, name, email, hashed_password, role FROM users WHERE email = $1;
 
 -- name: CreateUser :one
 INSERT INTO users (name, email, hashed_password, role) 
