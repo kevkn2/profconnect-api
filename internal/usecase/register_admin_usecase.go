@@ -1,33 +1,36 @@
 package usecase
 
 import (
+	"context"
 	"errors"
 
+	"profconnect-api/internal/domain/constants"
 	"profconnect-api/internal/domain/entities"
 	inputoutput "profconnect-api/internal/domain/input_output"
 	"profconnect-api/internal/domain/port"
 	profconnect_utils "profconnect-api/internal/infrastructure/pkg/utils"
 )
 
-type registerUsecase struct {
+type registerAdminUsecase struct {
 	userRepository port.UserRepository
 }
 
-// NewRegisterUsecase creates a new instance of RegisterUsecase
-func NewRegisterUsecase(userRepository port.UserRepository) port.Usecase[inputoutput.RegisterInput, inputoutput.RegisterOutput] {
-	return &registerUsecase{
+// NewRegisterAdminUsecase creates a new instance of RegisterAdminUsecase
+func NewRegisterAdminUsecase(userRepository port.UserRepository) port.Usecase[inputoutput.RegisterInput, inputoutput.RegisterOutput] {
+	return &registerAdminUsecase{
 		userRepository: userRepository,
 	}
 }
 
 // Execute implements port.Usecase
-func (r *registerUsecase) Execute(input *inputoutput.RegisterInput) (*inputoutput.RegisterOutput, error) {
+func (r *registerAdminUsecase) Execute(input *inputoutput.RegisterInput) (*inputoutput.RegisterOutput, error) {
+	ctx := context.Background()
 	email := input.Email
 	name := input.Name
 	password := input.Password
 
 	// Check if user with this email already exists
-	userExist, err := r.userRepository.GetByEmail(email)
+	userExist, err := r.userRepository.GetByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
@@ -47,10 +50,11 @@ func (r *registerUsecase) Execute(input *inputoutput.RegisterInput) (*inputoutpu
 		Name:           name,
 		Email:          email,
 		HashedPassword: hashedPassword,
+		Role:           string(constants.Admin),
 	}
 
 	// Save user to database
-	createdUser, err := r.userRepository.Create(newUser)
+	createdUser, err := r.userRepository.Create(ctx, newUser)
 	if err != nil {
 		return nil, err
 	}

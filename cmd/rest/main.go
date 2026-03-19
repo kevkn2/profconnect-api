@@ -31,13 +31,15 @@ func main() {
 
 	// Initialize repositories (infrastructure adapters)
 	userRepository := repository.NewUserRepository(queries)
+	professorRepository := repository.NewProfessorRepository(queries)
 
 	// Initialize use cases
-	registerUsecase := usecase.NewRegisterUsecase(userRepository)
+	registerAdminUsecase := usecase.NewRegisterAdminUsecase(userRepository)
+	registerProfessorUsecase := usecase.NewRegisterProfessorUsecase(userRepository, professorRepository)
 	loginUsecase := usecase.NewLoginUseCase(userRepository)
 
 	// Initialize handlers (presentation adapters)
-	h := handler.NewHandler(registerUsecase, loginUsecase)
+	h := handler.NewHandler(registerAdminUsecase, registerProfessorUsecase, loginUsecase)
 
 	// Initialize Fiber app
 	app := fiber.New()

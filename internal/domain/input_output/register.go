@@ -7,6 +7,12 @@ type RegisterInput struct {
 	Password string `json:"password"`
 }
 
+type RegisterProfessorInput struct {
+	RegisterInput
+	University string `json:"university"`
+	Department string `json:"department"`
+}
+
 // RegisterOutput defines the output for user registration
 type RegisterOutput struct {
 	Message string `json:"message"`

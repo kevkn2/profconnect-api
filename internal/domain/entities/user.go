@@ -6,4 +6,5 @@ type User struct {
 	Name           string `json:"name"`
 	Email          string `json:"email"`
 	HashedPassword string `json:"-"` // Never expose in JSON
+	Role           string `json:"role"`
 }

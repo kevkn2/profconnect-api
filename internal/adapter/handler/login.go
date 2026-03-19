@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	inputoutput "profconnect-api/internal/domain/input_output"
 
@@ -25,6 +26,7 @@ func (h *Handler) Login(c fiber.Ctx) error {
 
 	output, err := h.loginUseCase.Execute(&input)
 	if err != nil {
+		fmt.Printf("error: %v", err)
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "invalid credentials"})
 	}
 

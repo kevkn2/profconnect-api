@@ -24,8 +24,8 @@ func NewUserRepository(queries *generated.Queries) port.UserRepository {
 }
 
 // GetByEmail retrieves a user by email
-func (r *userRepository) GetByEmail(email string) (*entities.User, error) {
-	user, err := r.queries.GetUserByEmail(context.Background(), email)
+func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entities.User, error) {
+	user, err := r.queries.GetUserByEmail(ctx, email)
 	if err != nil {
 		return nil, nil // Return nil for not found to match port contract
 	}
@@ -34,8 +34,8 @@ func (r *userRepository) GetByEmail(email string) (*entities.User, error) {
 }
 
 // Create inserts a new user
-func (r *userRepository) Create(user *entities.User) (*entities.User, error) {
-	created, err := r.queries.CreateUser(context.Background(), generated.CreateUserParams{
+func (r *userRepository) Create(ctx context.Context, user *entities.User) (*entities.User, error) {
+	created, err := r.queries.CreateUser(ctx, generated.CreateUserParams{
 		Name:           user.Name,
 		Email:          user.Email,
 		HashedPassword: user.HashedPassword,
@@ -49,13 +49,13 @@ func (r *userRepository) Create(user *entities.User) (*entities.User, error) {
 }
 
 // Update modifies an existing user
-func (r *userRepository) Update(user *entities.User) (*entities.User, error) {
+func (r *userRepository) Update(ctx context.Context, user *entities.User) (*entities.User, error) {
 	userID, err := uuid.Parse(user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid user id: %w", err)
 	}
 
-	_, err = r.queries.UpdateUser(context.Background(), generated.UpdateUserParams{
+	_, err = r.queries.UpdateUser(ctx, generated.UpdateUserParams{
 		ID:             userID,
 		Name:           user.Name,
 		Email:          user.Email,
@@ -69,13 +69,13 @@ func (r *userRepository) Update(user *entities.User) (*entities.User, error) {
 }
 
 // Delete removes a user
-func (r *userRepository) Delete(id string) error {
+func (r *userRepository) Delete(ctx context.Context, id string) error {
 	userID, err := uuid.Parse(id)
 	if err != nil {
 		return fmt.Errorf("invalid user id: %w", err)
 	}
 
-	err = r.queries.DeleteUserByID(context.Background(), userID)
+	err = r.queries.DeleteUserByID(ctx, userID)
 	if err != nil {
 		return fmt.Errorf("delete user: %w", err)
 	}
@@ -90,5 +90,6 @@ func mapGetUserByEmailRowToEntity(u generated.GetUserByEmailRow) *entities.User 
 		Name:           u.Name,
 		Email:          u.Email,
 		HashedPassword: u.HashedPassword,
+		Role:           u.Role,
 	}
 }

@@ -7,17 +7,20 @@ import (
 
 // Handler contains all HTTP handlers
 type Handler struct {
-	registerUsecase port.Usecase[inputoutput.RegisterInput, inputoutput.RegisterOutput]
-	loginUseCase    port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput]
+	registerAdminUsecase     port.Usecase[inputoutput.RegisterInput, inputoutput.RegisterOutput]
+	registerProfessorUsecase port.Usecase[inputoutput.RegisterProfessorInput, inputoutput.RegisterOutput]
+	loginUseCase             port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput]
 }
 
 // NewHandler creates a new handler instance
 func NewHandler(
-	registerUsecase port.Usecase[inputoutput.RegisterInput, inputoutput.RegisterOutput],
+	registerAdminUsecase port.Usecase[inputoutput.RegisterInput, inputoutput.RegisterOutput],
+	registerProfessorUsecase port.Usecase[inputoutput.RegisterProfessorInput, inputoutput.RegisterOutput],
 	loginUseCase port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput],
 ) *Handler {
 	return &Handler{
-		registerUsecase: registerUsecase,
-		loginUseCase:    loginUseCase,
+		registerAdminUsecase:     registerAdminUsecase,
+		registerProfessorUsecase: registerProfessorUsecase,
+		loginUseCase:             loginUseCase,
 	}
 }

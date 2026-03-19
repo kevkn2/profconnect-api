@@ -8,8 +8,8 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func (h *Handler) Register(c fiber.Ctx) error {
-	var input inputoutput.RegisterInput
+func (h *Handler) RegisterProfessor(c fiber.Ctx) error {
+	var input inputoutput.RegisterProfessorInput
 	if err := c.Bind().Body(&input); err != nil {
 		return c.Status(http.StatusUnprocessableEntity).JSON(fiber.Map{
 			"message": "no data found",
@@ -32,8 +32,18 @@ func (h *Handler) Register(c fiber.Ctx) error {
 			"message": "password is required",
 		})
 	}
+	if input.University == "" {
+		return c.Status(http.StatusUnprocessableEntity).JSON(fiber.Map{
+			"message": "university is required",
+		})
+	}
+	if input.Department == "" {
+		return c.Status(http.StatusUnprocessableEntity).JSON(fiber.Map{
+			"message": "department is required",
+		})
+	}
 
-	result, err := h.registerUsecase.Execute(&input)
+	result, err := h.registerProfessorUsecase.Execute(&input)
 	if err != nil {
 		fmt.Println("Error:", err.Error())
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{

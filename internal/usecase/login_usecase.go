@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	inputoutput "profconnect-api/internal/domain/input_output"
 	"profconnect-api/internal/domain/port"
 	profconnect_utils "profconnect-api/internal/infrastructure/pkg/utils"
@@ -18,10 +19,11 @@ func NewLoginUseCase(userRepository port.UserRepository) port.Usecase[inputoutpu
 
 // Execute implements port.Usecase.
 func (l *LoginUseCase) Execute(input *inputoutput.LoginInput) (*inputoutput.LoginOutput, error) {
+	ctx := context.Background()
 	email := input.Email
 	password := input.Password
 
-	user, err := l.userRepository.GetByEmail(email)
+	user, err := l.userRepository.GetByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
