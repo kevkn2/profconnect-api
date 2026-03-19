@@ -12,12 +12,15 @@ import (
 
 type Querier interface {
 	CreateProfessor(ctx context.Context, arg CreateProfessorParams) (CreateProfessorRow, error)
+	CreateStudent(ctx context.Context, arg CreateStudentParams) (CreateStudentRow, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
 	DeleteUserByID(ctx context.Context, id uuid.UUID) error
 	GetProfessorByUserID(ctx context.Context, userID uuid.UUID) (GetProfessorByUserIDRow, error)
+	GetStudentByUserID(ctx context.Context, userID uuid.UUID) (GetStudentByUserIDRow, error)
 	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow, error)
 	UpdateProfessor(ctx context.Context, arg UpdateProfessorParams) (UpdateProfessorRow, error)
+	UpdateStudent(ctx context.Context, arg UpdateStudentParams) (UpdateStudentRow, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error)
 }
 

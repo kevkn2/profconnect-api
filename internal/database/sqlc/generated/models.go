@@ -19,6 +19,16 @@ type Professor struct {
 	UpdatedAt  sql.NullTime `json:"updated_at"`
 }
 
+type Student struct {
+	ID                uuid.UUID      `json:"id"`
+	UserID            uuid.UUID      `json:"user_id"`
+	University        string         `json:"university"`
+	Department        string         `json:"department"`
+	ResearchInterests sql.NullString `json:"research_interests"`
+	CreatedAt         sql.NullTime   `json:"created_at"`
+	UpdatedAt         sql.NullTime   `json:"updated_at"`
+}
+
 type User struct {
 	ID             uuid.UUID    `json:"id"`
 	Name           string       `json:"name"`
