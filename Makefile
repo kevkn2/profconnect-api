@@ -35,6 +35,13 @@ migrate-up:
 
 migrate-down:
 	migrate -path ./internal/database/migrations -database "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(DB_SSLMODE)" down
+	
+migrate-force:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Error: VERSION is required. Usage: make migrate-force VERSION=version_number"; \
+		exit 1; \
+	fi
+	migrate -path ./internal/database/migrations -database "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(DB_SSLMODE)" force $(VERSION)
 
 migrate-create:
 	@if [ -z "$(NAME)" ]; then \
