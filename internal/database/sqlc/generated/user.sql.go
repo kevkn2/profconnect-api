@@ -14,7 +14,7 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (name, email, hashed_password, role) 
 VALUES ($1, $2, $3, $4) 
-RETURNING id, name, email, hashed_password, role
+RETURNING id, name, email, role
 `
 
 type CreateUserParams struct {
@@ -25,11 +25,10 @@ type CreateUserParams struct {
 }
 
 type CreateUserRow struct {
-	ID             uuid.UUID `json:"id"`
-	Name           string    `json:"name"`
-	Email          string    `json:"email"`
-	HashedPassword string    `json:"hashed_password"`
-	Role           string    `json:"role"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Email string    `json:"email"`
+	Role  string    `json:"role"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
@@ -44,7 +43,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		&i.ID,
 		&i.Name,
 		&i.Email,
-		&i.HashedPassword,
 		&i.Role,
 	)
 	return i, err
@@ -60,15 +58,14 @@ func (q *Queries) DeleteUserByID(ctx context.Context, id uuid.UUID) error {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, name, email, hashed_password, role FROM users WHERE email = $1
+SELECT id, name, email,  role FROM users WHERE email = $1
 `
 
 type GetUserByEmailRow struct {
-	ID             uuid.UUID `json:"id"`
-	Name           string    `json:"name"`
-	Email          string    `json:"email"`
-	HashedPassword string    `json:"hashed_password"`
-	Role           string    `json:"role"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Email string    `json:"email"`
+	Role  string    `json:"role"`
 }
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
@@ -78,22 +75,20 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 		&i.ID,
 		&i.Name,
 		&i.Email,
-		&i.HashedPassword,
 		&i.Role,
 	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, name, email, hashed_password, role FROM users WHERE id = $1
+SELECT id, name, email, role FROM users WHERE id = $1
 `
 
 type GetUserByIDRow struct {
-	ID             uuid.UUID `json:"id"`
-	Name           string    `json:"name"`
-	Email          string    `json:"email"`
-	HashedPassword string    `json:"hashed_password"`
-	Role           string    `json:"role"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Email string    `json:"email"`
+	Role  string    `json:"role"`
 }
 
 func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow, error) {
@@ -103,7 +98,6 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow
 		&i.ID,
 		&i.Name,
 		&i.Email,
-		&i.HashedPassword,
 		&i.Role,
 	)
 	return i, err
@@ -113,7 +107,7 @@ const updateUser = `-- name: UpdateUser :one
 UPDATE users 
 SET name = $1, email = $2, hashed_password = $3, role = $4, updated_at = CURRENT_TIMESTAMP
 WHERE id = $5
-RETURNING id, name, email, hashed_password, role
+RETURNING id, name, email, role
 `
 
 type UpdateUserParams struct {
@@ -125,11 +119,10 @@ type UpdateUserParams struct {
 }
 
 type UpdateUserRow struct {
-	ID             uuid.UUID `json:"id"`
-	Name           string    `json:"name"`
-	Email          string    `json:"email"`
-	HashedPassword string    `json:"hashed_password"`
-	Role           string    `json:"role"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Email string    `json:"email"`
+	Role  string    `json:"role"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {
@@ -145,7 +138,6 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateU
 		&i.ID,
 		&i.Name,
 		&i.Email,
-		&i.HashedPassword,
 		&i.Role,
 	)
 	return i, err

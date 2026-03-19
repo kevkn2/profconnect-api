@@ -43,12 +43,24 @@ func (q *Queries) CreateProfessor(ctx context.Context, arg CreateProfessorParams
 }
 
 const getProfessorByUserID = `-- name: GetProfessorByUserID :one
-SELECT id, user_id, university, department FROM professors WHERE user_id = $1
+SELECT 
+    p.id,
+    p.user_id,
+    u.name AS user_name,
+    u.email AS user_email,
+    p.university,
+    p.department 
+FROM professors p
+JOIN users u ON p.user_id = u.id
+
+WHERE user_id = $1
 `
 
 type GetProfessorByUserIDRow struct {
 	ID         uuid.UUID `json:"id"`
 	UserID     uuid.UUID `json:"user_id"`
+	UserName   string    `json:"user_name"`
+	UserEmail  string    `json:"user_email"`
 	University string    `json:"university"`
 	Department string    `json:"department"`
 }
@@ -59,6 +71,8 @@ func (q *Queries) GetProfessorByUserID(ctx context.Context, userID uuid.UUID) (G
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
+		&i.UserName,
+		&i.UserEmail,
 		&i.University,
 		&i.Department,
 	)
@@ -66,10 +80,24 @@ func (q *Queries) GetProfessorByUserID(ctx context.Context, userID uuid.UUID) (G
 }
 
 const updateProfessor = `-- name: UpdateProfessor :one
-UPDATE professors
-SET university = $1, department = $2, updated_at = CURRENT_TIMESTAMP
-WHERE user_id = $3
-RETURNING id, user_id, university, department
+WITH updated AS (
+    UPDATE professors
+    SET university = $1,
+        department = $2,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE user_id = $3
+    RETURNING id, user_id, university, department
+)
+SELECT 
+    u.id,
+    u.user_id,
+    u.university,
+    u.department,
+    usr.name,
+    usr.email,
+    usr.role
+FROM updated u
+JOIN users usr ON usr.id = u.user_id
 `
 
 type UpdateProfessorParams struct {
@@ -83,6 +111,9 @@ type UpdateProfessorRow struct {
 	UserID     uuid.UUID `json:"user_id"`
 	University string    `json:"university"`
 	Department string    `json:"department"`
+	Name       string    `json:"name"`
+	Email      string    `json:"email"`
+	Role       string    `json:"role"`
 }
 
 func (q *Queries) UpdateProfessor(ctx context.Context, arg UpdateProfessorParams) (UpdateProfessorRow, error) {
@@ -93,6 +124,9 @@ func (q *Queries) UpdateProfessor(ctx context.Context, arg UpdateProfessorParams
 		&i.UserID,
 		&i.University,
 		&i.Department,
+		&i.Name,
+		&i.Email,
+		&i.Role,
 	)
 	return i, err
 }
