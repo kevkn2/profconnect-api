@@ -18,4 +18,5 @@ type User struct {
 	Deleted        bool         `json:"deleted"`
 	CreatedAt      sql.NullTime `json:"created_at"`
 	UpdatedAt      sql.NullTime `json:"updated_at"`
+	Role           string       `json:"role"`
 }

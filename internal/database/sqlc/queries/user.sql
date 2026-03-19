@@ -1,16 +1,16 @@
 -- name: GetUserByEmail :one
-SELECT id, name, email, hashed_password FROM users WHERE email = $1;
+SELECT id, name, email, hashed_password, role FROM users WHERE email = $1;
 
 -- name: CreateUser :one
-INSERT INTO users (name, email, hashed_password) 
-VALUES ($1, $2, $3) 
-RETURNING id, name, email, hashed_password;
+INSERT INTO users (name, email, hashed_password, role) 
+VALUES ($1, $2, $3, $4) 
+RETURNING id, name, email, hashed_password, role;
 
 -- name: UpdateUser :one
 UPDATE users 
-SET name = $1, email = $2, hashed_password = $3 
-WHERE id = $4 
-RETURNING id, name, email, hashed_password;
+SET name = $1, email = $2, hashed_password = $3, role = $4
+WHERE id = $5
+RETURNING id, name, email, hashed_password, role;
 
 -- name: DeleteUserByID :exec
 DELETE FROM users WHERE id = $1;
