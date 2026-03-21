@@ -9,6 +9,7 @@ import (
 	"profconnect-api/internal/config"
 	"profconnect-api/internal/database/sqlc/generated"
 	"profconnect-api/internal/infrastructure/adapter/repository"
+	"profconnect-api/internal/infrastructure/adapter/service"
 	"profconnect-api/internal/usecase"
 
 	"github.com/gofiber/fiber/v3"
@@ -32,14 +33,24 @@ func main() {
 	// Initialize repositories (infrastructure adapters)
 	userRepository := repository.NewUserRepository(queries)
 	professorRepository := repository.NewProfessorRepository(queries)
+	studentRepository := repository.NewStudentsRepository(queries)
+
+	// Initialize services
+	registerService := service.NewRegisterService(userRepository)
 
 	// Initialize use cases
-	registerAdminUsecase := usecase.NewRegisterAdminUsecase(userRepository)
-	registerProfessorUsecase := usecase.NewRegisterProfessorUsecase(userRepository, professorRepository)
+	registerAdminUsecase := usecase.NewRegisterAdminUsecase(registerService)
+	registerProfessorUsecase := usecase.NewRegisterProfessorUsecase(registerService, professorRepository)
+	registerStudentUsecase := usecase.NewRegisterStudentUsecase(registerService, studentRepository)
 	loginUsecase := usecase.NewLoginUseCase(userRepository)
 
 	// Initialize handlers (presentation adapters)
-	h := handler.NewHandler(registerAdminUsecase, registerProfessorUsecase, loginUsecase)
+	h := handler.NewHandler(
+		registerAdminUsecase,
+		registerProfessorUsecase,
+		registerStudentUsecase,
+		loginUsecase,
+	)
 
 	// Initialize Fiber app
 	app := fiber.New()

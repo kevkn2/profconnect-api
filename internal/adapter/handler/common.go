@@ -9,6 +9,7 @@ import (
 type Handler struct {
 	registerAdminUsecase     port.Usecase[inputoutput.RegisterInput, inputoutput.RegisterOutput]
 	registerProfessorUsecase port.Usecase[inputoutput.RegisterProfessorInput, inputoutput.RegisterOutput]
+	registerStudentUsecase   port.Usecase[inputoutput.RegisterStudentInput, inputoutput.RegisterOutput]
 	loginUseCase             port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput]
 }
 
@@ -16,11 +17,13 @@ type Handler struct {
 func NewHandler(
 	registerAdminUsecase port.Usecase[inputoutput.RegisterInput, inputoutput.RegisterOutput],
 	registerProfessorUsecase port.Usecase[inputoutput.RegisterProfessorInput, inputoutput.RegisterOutput],
+	registerStudentUsecase port.Usecase[inputoutput.RegisterStudentInput, inputoutput.RegisterOutput],
 	loginUseCase port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput],
 ) *Handler {
 	return &Handler{
 		registerAdminUsecase:     registerAdminUsecase,
 		registerProfessorUsecase: registerProfessorUsecase,
+		registerStudentUsecase:   registerStudentUsecase,
 		loginUseCase:             loginUseCase,
 	}
 }

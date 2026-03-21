@@ -2,27 +2,25 @@ package usecase
 
 import (
 	"context"
-	"errors"
 
 	"profconnect-api/internal/domain/constants"
 	"profconnect-api/internal/domain/entities"
 	inputoutput "profconnect-api/internal/domain/input_output"
 	"profconnect-api/internal/domain/port"
-	profconnect_utils "profconnect-api/internal/infrastructure/pkg/utils"
 )
 
 type registerProfessorUsecase struct {
-	userRepository      port.UserRepository
+	registerService     port.Service[inputoutput.RegisterInput, entities.User]
 	professorRepository port.ProfessorRepository
 }
 
 // NewRegisterProfessorUsecase creates a new instance of RegisterProfessorUsecase
 func NewRegisterProfessorUsecase(
-	userRepository port.UserRepository,
+	registerService port.Service[inputoutput.RegisterInput, entities.User],
 	professorRepository port.ProfessorRepository,
 ) port.Usecase[inputoutput.RegisterProfessorInput, inputoutput.RegisterOutput] {
 	return &registerProfessorUsecase{
-		userRepository:      userRepository,
+		registerService:     registerService,
 		professorRepository: professorRepository,
 	}
 }
@@ -33,42 +31,24 @@ func (r *registerProfessorUsecase) Execute(input *inputoutput.RegisterProfessorI
 	email := input.Email
 	name := input.Name
 	password := input.Password
+	university := input.University
+	department := input.Department
 
-	// Check if user with this email already exists
-	userExist, err := r.userRepository.GetByEmail(ctx, email)
+	createdUser, err := r.registerService.Execute(ctx, &inputoutput.RegisterInput{
+		Name:     name,
+		Email:    email,
+		Password: password,
+		Role:     string(constants.Professor),
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	if userExist != nil {
-		return nil, errors.New("user already exists")
-	}
-
-	// Hash the password
-	hashedPassword, err := profconnect_utils.HashPassword(password)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create new user
-	newUser := &entities.User{
-		Name:           name,
-		Email:          email,
-		HashedPassword: hashedPassword,
-		Role:           string(constants.Admin),
-	}
-
-	// Save user to database
-	createdUser, err := r.userRepository.Create(ctx, newUser)
-	if err != nil {
-		return nil, err
-	}
-
-	// save the professor data to database
+	// Save the professor data to database
 	newProfessor := &entities.Professor{
 		User:       createdUser,
-		University: input.University,
-		Department: input.Department,
+		University: university,
+		Department: department,
 	}
 
 	// Save professor to database

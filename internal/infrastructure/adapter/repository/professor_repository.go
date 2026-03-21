@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"profconnect-api/internal/database/sqlc/generated"
+	"profconnect-api/internal/domain/constants"
 	"profconnect-api/internal/domain/entities"
 	"profconnect-api/internal/domain/port"
 
@@ -65,8 +66,8 @@ func (p *professorRepository) GetByUserID(ctx context.Context, userID string) (*
 			ID:             professor.UserID.String(),
 			Name:           professor.UserName,
 			Email:          professor.UserEmail,
-			HashedPassword: "",          // Never expose hashed password
-			Role:           "professor", // Assuming role is always professor for this entity
+			HashedPassword: "", // Never expose hashed password
+			Role:           constants.Professor,
 		},
 		University: professor.University,
 		Department: professor.Department,

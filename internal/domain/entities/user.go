@@ -1,10 +1,12 @@
 package entities
 
+import "profconnect-api/internal/domain/constants"
+
 // User represents a user entity in the system
 type User struct {
-	ID             string `json:"id"`
-	Name           string `json:"name"`
-	Email          string `json:"email"`
-	HashedPassword string `json:"-"` // Never expose in JSON
-	Role           string `json:"role"`
+	ID             string          `json:"id"`
+	Name           string          `json:"name"`
+	Email          string          `json:"email"`
+	HashedPassword string          `json:"-"` // Never expose in JSON
+	Role           constants.Roles `json:"role"`
 }

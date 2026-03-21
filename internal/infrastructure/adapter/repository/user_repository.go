@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"profconnect-api/internal/database/sqlc/generated"
+	"profconnect-api/internal/domain/constants"
 	"profconnect-api/internal/domain/entities"
 	"profconnect-api/internal/domain/port"
 
@@ -90,6 +91,6 @@ func mapGetUserByEmailRowToEntity(u generated.GetUserByEmailRow) *entities.User 
 		Name:           u.Name,
 		Email:          u.Email,
 		HashedPassword: u.HashedPassword,
-		Role:           u.Role,
+		Role:           constants.Roles(u.Role),
 	}
 }
