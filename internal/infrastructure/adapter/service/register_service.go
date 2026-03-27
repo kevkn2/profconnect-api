@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"errors"
+	"profconnect-api/internal/domain"
 	"profconnect-api/internal/domain/constants"
 	"profconnect-api/internal/domain/entities"
 	inputoutput "profconnect-api/internal/domain/input_output"
@@ -25,17 +25,17 @@ func (r *registerService) Execute(ctx context.Context, input *inputoutput.Regist
 	// Check if user with this email already exists
 	userExist, err := r.userRepository.GetByEmail(ctx, input.Email)
 	if err != nil {
-		return nil, err
+		return nil, domain.InternalErr("failed to check existing user", err)
 	}
 
 	if userExist != nil {
-		return nil, errors.New("user already exists")
+		return nil, domain.Conflict("user with this email already exists")
 	}
 
 	// Hash the password
 	hashedPassword, err := profconnect_utils.HashPassword(input.Password)
 	if err != nil {
-		return nil, err
+		return nil, domain.InternalErr("failed to hash password", err)
 	}
 
 	// Create new user
@@ -49,7 +49,7 @@ func (r *registerService) Execute(ctx context.Context, input *inputoutput.Regist
 	// Save user to database
 	createdUser, err := r.userRepository.Create(ctx, newUser)
 	if err != nil {
-		return nil, err
+		return nil, domain.InternalErr("failed to create user", err)
 	}
 
 	return createdUser, nil

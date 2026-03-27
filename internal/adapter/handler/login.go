@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	inputoutput "profconnect-api/internal/domain/input_output"
 
@@ -11,28 +10,31 @@ import (
 func (h *Handler) Login(c fiber.Ctx) error {
 	var input inputoutput.LoginInput
 	if err := c.Bind().Body(&input); err != nil {
-		return c.Status(http.StatusUnprocessableEntity).JSON(fiber.Map{
-			"message": "no data found",
+		return c.Status(http.StatusUnprocessableEntity).JSON(ErrorResponse{
+			Message: "no data found",
 		})
 	}
 
 	// check each field
 	if input.Email == "" {
-		return c.Status(http.StatusUnprocessableEntity).JSON(fiber.Map{"message": "email is required"})
+		return c.Status(http.StatusUnprocessableEntity).JSON(ErrorResponse{
+			Message: "email is required",
+		})
 	}
 	if input.Password == "" {
-		return c.Status(http.StatusUnprocessableEntity).JSON(fiber.Map{"message": "password is required"})
+		return c.Status(http.StatusUnprocessableEntity).JSON(ErrorResponse{
+			Message: "password is required",
+		})
 	}
 
 	output, err := h.loginUseCase.Execute(&input)
 	if err != nil {
-		fmt.Printf("error: %v", err)
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "invalid credentials"})
+		return HandleError(c, err)
 	}
 
 	if output == nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "no user found",
+		return c.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
+			Message: "invalid credentials",
 		})
 	}
 
