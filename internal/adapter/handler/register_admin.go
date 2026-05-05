@@ -7,6 +7,17 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
+// RegisterAdmin godoc
+// @Summary Register admin user
+// @Description Create a new admin account with email, name, and password
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body inputoutput.RegisterInput true "Admin registration credentials"
+// @Success 200 {object} inputoutput.RegisterOutput
+// @Failure 422 {object} ErrorResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /register-admin [post]
 func (h *Handler) RegisterAdmin(c fiber.Ctx) error {
 	var input inputoutput.RegisterInput
 	if err := c.Bind().Body(&input); err != nil {

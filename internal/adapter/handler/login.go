@@ -7,6 +7,17 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
+// Login godoc
+// @Summary Login user
+// @Description Authenticate user with email and password
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body inputoutput.LoginInput true "Login credentials"
+// @Success 200 {object} inputoutput.LoginOutput
+// @Failure 422 {object} ErrorResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /login [post]
 func (h *Handler) Login(c fiber.Ctx) error {
 	var input inputoutput.LoginInput
 	if err := c.Bind().Body(&input); err != nil {
@@ -38,5 +49,9 @@ func (h *Handler) Login(c fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(output)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "login successful",
+		"token":   output.Token,
+		"type":    output.Type,
+	})
 }

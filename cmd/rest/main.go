@@ -14,6 +14,7 @@ import (
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
+	"github.com/gofiber/fiber/v3/middleware/static"
 )
 
 func main() {
@@ -55,6 +56,8 @@ func main() {
 	// Initialize Fiber app
 	app := fiber.New()
 
+	app.Use("/docs", static.New("./docs"))
+
 	// Enable CORS middleware
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"http://localhost:3000"},
@@ -65,6 +68,7 @@ func main() {
 	// Initialize router and register routes
 	router := routes.NewRouter(app, h)
 	router.RegisterGeneralRoutes()
+	router.RegisterSwaggerRoutes()
 
 	// Start the server on port 3000
 	app.Listen(":3001")

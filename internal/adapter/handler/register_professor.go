@@ -7,6 +7,17 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
+// RegisterProfessor godoc
+// @Summary Register professor user
+// @Description Create a new professor account with email, name, password, university, and department
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body inputoutput.RegisterProfessorInput true "Professor registration credentials"
+// @Success 200 {object} inputoutput.RegisterOutput
+// @Failure 422 {object} ErrorResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /register-professor [post]
 func (h *Handler) RegisterProfessor(c fiber.Ctx) error {
 	var input inputoutput.RegisterProfessorInput
 	if err := c.Bind().Body(&input); err != nil {

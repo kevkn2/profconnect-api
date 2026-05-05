@@ -1,0 +1,215 @@
+definitions:
+  handler.ErrorResponse:
+    properties:
+      message:
+        type: string
+      type:
+        type: string
+    type: object
+  inputoutput.LoginInput:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      password:
+        example: password123
+        type: string
+    type: object
+  inputoutput.LoginOutput:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      type:
+        example: Bearer
+        type: string
+    type: object
+  inputoutput.RegisterInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+    type: object
+  inputoutput.RegisterOutput:
+    properties:
+      message:
+        type: string
+      user_id:
+        type: string
+    type: object
+  inputoutput.RegisterProfessorInput:
+    properties:
+      department:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      university:
+        type: string
+    type: object
+  inputoutput.RegisterStudentInput:
+    properties:
+      department:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      research_interests:
+        type: string
+      role:
+        type: string
+      university:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /hello:
+    get:
+      description: Returns a simple hello world message
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: Hello
+      summary: Hello World
+      tags:
+      - Health
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inputoutput.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.LoginOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Login user
+      tags:
+      - Auth
+  /register-admin:
+    post:
+      consumes:
+      - application/json
+      description: Create a new admin account with email, name, and password
+      parameters:
+      - description: Admin registration credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inputoutput.RegisterInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.RegisterOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Register admin user
+      tags:
+      - Auth
+  /register-professor:
+    post:
+      consumes:
+      - application/json
+      description: Create a new professor account with email, name, password, university,
+        and department
+      parameters:
+      - description: Professor registration credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inputoutput.RegisterProfessorInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.RegisterOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Register professor user
+      tags:
+      - Auth
+  /register-student:
+    post:
+      consumes:
+      - application/json
+      description: Create a new student account with email, name, password, university,
+        department, and research interests
+      parameters:
+      - description: Student registration credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inputoutput.RegisterStudentInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.RegisterOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Register student user
+      tags:
+      - Auth
+swagger: "2.0"
