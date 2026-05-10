@@ -17,7 +17,7 @@ import (
 // @Success 200 {object} inputoutput.RegisterOutput
 // @Failure 422 {object} ErrorResponse
 // @Failure 400 {object} ErrorResponse
-// @Router /register-admin [post]
+// @Router /api/register/admin [post]
 func (h *Handler) RegisterAdmin(c fiber.Ctx) error {
 	var input inputoutput.RegisterInput
 	if err := c.Bind().Body(&input); err != nil {

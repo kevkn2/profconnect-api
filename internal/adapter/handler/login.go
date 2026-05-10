@@ -17,7 +17,7 @@ import (
 // @Success 200 {object} inputoutput.LoginOutput
 // @Failure 422 {object} ErrorResponse
 // @Failure 400 {object} ErrorResponse
-// @Router /login [post]
+// @Router /api/login [post]
 func (h *Handler) Login(c fiber.Ctx) error {
 	var input inputoutput.LoginInput
 	if err := c.Bind().Body(&input); err != nil {

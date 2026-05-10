@@ -19,7 +19,7 @@ import (
 // @Failure 401 {object} ErrorResponse
 // @Failure 403 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
-// @Router /profile/professor [get]
+// @Router /api/profile/professor [get]
 func (h *Handler) ProfessorProfile(c fiber.Ctx) error {
 	userID, ok := c.Locals(middleware.LocalsUserID).(string)
 	if !ok || userID == "" {
@@ -46,7 +46,7 @@ func (h *Handler) ProfessorProfile(c fiber.Ctx) error {
 // @Failure 401 {object} ErrorResponse
 // @Failure 403 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
-// @Router /profile/student [get]
+// @Router /api/profile/student [get]
 func (h *Handler) StudentProfile(c fiber.Ctx) error {
 	userID, ok := c.Locals(middleware.LocalsUserID).(string)
 	if !ok || userID == "" {
