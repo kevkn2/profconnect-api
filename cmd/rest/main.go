@@ -50,7 +50,8 @@ func main() {
 	registerAdminUsecase := usecase.NewRegisterAdminUsecase(registerService)
 	registerProfessorUsecase := usecase.NewRegisterProfessorUsecase(registerService, professorRepository)
 	registerStudentUsecase := usecase.NewRegisterStudentUsecase(registerService, studentRepository)
-	loginUsecase := usecase.NewLoginUseCase(userRepository)
+	loginUsecase := usecase.NewLoginUsecase(userRepository)
+	refreshUsecase := usecase.NewRefreshUsecase(userRepository)
 	professorProfileUsecase := usecase.NewProfessorProfileUsecase(professorRepository)
 	studentProfileUsecase := usecase.NewStudentProfileUsecase(studentRepository)
 
@@ -60,6 +61,7 @@ func main() {
 		registerProfessorUsecase,
 		registerStudentUsecase,
 		loginUsecase,
+		refreshUsecase,
 		professorProfileUsecase,
 		studentProfileUsecase,
 	)

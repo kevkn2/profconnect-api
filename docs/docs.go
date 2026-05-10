@@ -15,27 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/hello": {
-            "get": {
-                "description": "Returns a simple hello world message",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Health"
-                ],
-                "summary": "Hello World",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "Hello"
-                        }
-                    }
-                }
-            }
-        },
-        "/login": {
+        "/api/login": {
             "post": {
                 "description": "Authenticate user with email and password",
                 "consumes": [
@@ -81,7 +61,139 @@ const docTemplate = `{
                 }
             }
         },
-        "/register-admin": {
+        "/api/profile/professor": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the authenticated professor's profile derived from JWT",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Get professor profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.ProfessorProfileOutput"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/profile/student": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the authenticated student's profile derived from JWT",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Get student profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.StudentProfileOutput"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/refresh": {
+            "post": {
+                "description": "Exchange a valid refresh token for a new access + refresh token pair",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh access token",
+                "parameters": [
+                    {
+                        "description": "Refresh token",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.RefreshInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.RefreshOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/register/admin": {
             "post": {
                 "description": "Create a new admin account with email, name, and password",
                 "consumes": [
@@ -127,7 +239,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/register-professor": {
+        "/api/register/professor": {
             "post": {
                 "description": "Create a new professor account with email, name, password, university, and department",
                 "consumes": [
@@ -173,7 +285,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/register-student": {
+        "/api/register/student": {
             "post": {
                 "description": "Create a new student account with email, name, password, university, department, and research interests",
                 "consumes": [
@@ -218,6 +330,26 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/hello": {
+            "get": {
+                "description": "Returns a simple hello world message",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Hello World",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "Hello"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -248,6 +380,62 @@ const docTemplate = `{
         "inputoutput.LoginOutput": {
             "type": "object",
             "properties": {
+                "refresh_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
+                "token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
+                "type": {
+                    "type": "string",
+                    "example": "Bearer"
+                }
+            }
+        },
+        "inputoutput.ProfessorProfileOutput": {
+            "type": "object",
+            "properties": {
+                "department": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "university": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "inputoutput.RefreshInput": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+            }
+        },
+        "inputoutput.RefreshOutput": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
                 "token": {
                     "type": "string",
                     "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -331,6 +519,35 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "university": {
+                    "type": "string"
+                }
+            }
+        },
+        "inputoutput.StudentProfileOutput": {
+            "type": "object",
+            "properties": {
+                "department": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "research_interests": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "university": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }

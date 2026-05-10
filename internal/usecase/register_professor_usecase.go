@@ -26,34 +26,24 @@ func NewRegisterProfessorUsecase(
 }
 
 // Execute implements port.Usecase
-func (r *registerProfessorUsecase) Execute(input *inputoutput.RegisterProfessorInput) (*inputoutput.RegisterOutput, error) {
-	ctx := context.Background()
-	email := input.Email
-	name := input.Name
-	password := input.Password
-	university := input.University
-	department := input.Department
-
+func (r *registerProfessorUsecase) Execute(ctx context.Context, input *inputoutput.RegisterProfessorInput) (*inputoutput.RegisterOutput, error) {
 	createdUser, err := r.registerService.Execute(ctx, &inputoutput.RegisterInput{
-		Name:     name,
-		Email:    email,
-		Password: password,
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: input.Password,
 		Role:     string(constants.Professor),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	// Save the professor data to database
 	newProfessor := &entities.Professor{
 		User:       createdUser,
-		University: university,
-		Department: department,
+		University: input.University,
+		Department: input.Department,
 	}
 
-	// Save professor to database
-	_, err = r.professorRepository.Create(ctx, newProfessor)
-	if err != nil {
+	if _, err := r.professorRepository.Create(ctx, newProfessor); err != nil {
 		return nil, err
 	}
 

@@ -1,5 +1,7 @@
 package port
 
+import "context"
+
 type Usecase[T, R any] interface {
-	Execute(input *T) (*R, error)
+	Execute(ctx context.Context, input *T) (*R, error)
 }

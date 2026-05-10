@@ -21,9 +21,7 @@ func NewStudentProfileUsecase(studentRepository port.StudentsRepository) port.Us
 }
 
 // Execute implements port.Usecase.
-func (u *studentProfileUsecase) Execute(input *inputoutput.ProfileInput) (*inputoutput.StudentProfileOutput, error) {
-	ctx := context.Background()
-
+func (u *studentProfileUsecase) Execute(ctx context.Context, input *inputoutput.ProfileInput) (*inputoutput.StudentProfileOutput, error) {
 	student, err := u.studentRepository.GetStudentByUserID(ctx, input.UserID)
 	if err != nil {
 		return nil, domain.InternalErr("failed to retrieve student profile", err)

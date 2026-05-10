@@ -12,6 +12,7 @@ func (r *Router) RegisterGeneralRoutes() {
 	r.app.Post("/api/register/professor", r.handler.RegisterProfessor)
 	r.app.Post("/api/register/student", r.handler.RegisterStudent)
 	r.app.Post("/api/login", r.handler.Login)
+	r.app.Post("/api/refresh", r.handler.Refresh)
 
 	r.app.Get(
 		"/api/profile/professor",

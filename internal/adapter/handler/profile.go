@@ -28,7 +28,7 @@ func (h *Handler) ProfessorProfile(c fiber.Ctx) error {
 		})
 	}
 
-	output, err := h.professorProfileUsecase.Execute(&inputoutput.ProfileInput{UserID: userID})
+	output, err := h.professorProfileUsecase.Execute(c.Context(), &inputoutput.ProfileInput{UserID: userID})
 	if err != nil {
 		return HandleError(c, err)
 	}
@@ -55,7 +55,7 @@ func (h *Handler) StudentProfile(c fiber.Ctx) error {
 		})
 	}
 
-	output, err := h.studentProfileUsecase.Execute(&inputoutput.ProfileInput{UserID: userID})
+	output, err := h.studentProfileUsecase.Execute(c.Context(), &inputoutput.ProfileInput{UserID: userID})
 	if err != nil {
 		return HandleError(c, err)
 	}

@@ -58,7 +58,7 @@ func (h *Handler) RegisterStudent(c fiber.Ctx) error {
 		})
 	}
 
-	result, err := h.registerStudentUsecase.Execute(&input)
+	result, err := h.registerStudentUsecase.Execute(c.Context(), &input)
 	if err != nil {
 		return HandleError(c, err)
 	}

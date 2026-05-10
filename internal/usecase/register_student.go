@@ -26,36 +26,25 @@ func NewRegisterStudentUsecase(
 }
 
 // Execute implements port.Usecase
-func (r *registerStudentUsecase) Execute(input *inputoutput.RegisterStudentInput) (*inputoutput.RegisterOutput, error) {
-	ctx := context.Background()
-	email := input.Email
-	name := input.Name
-	password := input.Password
-	university := input.University
-	department := input.Department
-	researchInterests := input.ResearchInterests
-
+func (r *registerStudentUsecase) Execute(ctx context.Context, input *inputoutput.RegisterStudentInput) (*inputoutput.RegisterOutput, error) {
 	createdUser, err := r.registerService.Execute(ctx, &inputoutput.RegisterInput{
-		Name:     name,
-		Email:    email,
-		Password: password,
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: input.Password,
 		Role:     string(constants.Student),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	// save the student data to database
 	newStudent := &entities.Student{
 		User:              createdUser,
-		University:        university,
-		Department:        department,
-		ResearchInterests: researchInterests,
+		University:        input.University,
+		Department:        input.Department,
+		ResearchInterests: input.ResearchInterests,
 	}
 
-	// Save student to database
-	_, err = r.studentsRepository.CreateStudent(ctx, newStudent)
-	if err != nil {
+	if _, err := r.studentsRepository.CreateStudent(ctx, newStudent); err != nil {
 		return nil, err
 	}
 

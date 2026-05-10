@@ -23,16 +23,11 @@ func NewRegisterAdminUsecase(
 }
 
 // Execute implements port.Usecase
-func (r *registerAdminUsecase) Execute(input *inputoutput.RegisterInput) (*inputoutput.RegisterOutput, error) {
-	ctx := context.Background()
-	email := input.Email
-	name := input.Name
-	password := input.Password
-
+func (r *registerAdminUsecase) Execute(ctx context.Context, input *inputoutput.RegisterInput) (*inputoutput.RegisterOutput, error) {
 	createdUser, err := r.registerService.Execute(ctx, &inputoutput.RegisterInput{
-		Name:     name,
-		Email:    email,
-		Password: password,
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: input.Password,
 		Role:     string(constants.Admin),
 	})
 	if err != nil {

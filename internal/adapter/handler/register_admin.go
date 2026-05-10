@@ -43,7 +43,7 @@ func (h *Handler) RegisterAdmin(c fiber.Ctx) error {
 		})
 	}
 
-	result, err := h.registerAdminUsecase.Execute(&input)
+	result, err := h.registerAdminUsecase.Execute(c.Context(), &input)
 	if err != nil {
 		return HandleError(c, err)
 	}

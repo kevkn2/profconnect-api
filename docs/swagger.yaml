@@ -17,6 +17,44 @@ definitions:
     type: object
   inputoutput.LoginOutput:
     properties:
+      refresh_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      type:
+        example: Bearer
+        type: string
+    type: object
+  inputoutput.ProfessorProfileOutput:
+    properties:
+      department:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+      university:
+        type: string
+      user_id:
+        type: string
+    type: object
+  inputoutput.RefreshInput:
+    properties:
+      refresh_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  inputoutput.RefreshOutput:
+    properties:
+      refresh_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
       token:
         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         type: string
@@ -74,23 +112,29 @@ definitions:
       university:
         type: string
     type: object
+  inputoutput.StudentProfileOutput:
+    properties:
+      department:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      research_interests:
+        type: string
+      role:
+        type: string
+      university:
+        type: string
+      user_id:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
-  /hello:
-    get:
-      description: Returns a simple hello world message
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: Hello
-      summary: Hello World
-      tags:
-      - Health
-  /login:
+  /api/login:
     post:
       consumes:
       - application/json
@@ -120,7 +164,92 @@ paths:
       summary: Login user
       tags:
       - Auth
-  /register-admin:
+  /api/profile/professor:
+    get:
+      description: Returns the authenticated professor's profile derived from JWT
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.ProfessorProfileOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get professor profile
+      tags:
+      - Profile
+  /api/profile/student:
+    get:
+      description: Returns the authenticated student's profile derived from JWT
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.StudentProfileOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get student profile
+      tags:
+      - Profile
+  /api/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Exchange a valid refresh token for a new access + refresh token
+        pair
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inputoutput.RefreshInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.RefreshOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Refresh access token
+      tags:
+      - Auth
+  /api/register/admin:
     post:
       consumes:
       - application/json
@@ -150,7 +279,7 @@ paths:
       summary: Register admin user
       tags:
       - Auth
-  /register-professor:
+  /api/register/professor:
     post:
       consumes:
       - application/json
@@ -181,7 +310,7 @@ paths:
       summary: Register professor user
       tags:
       - Auth
-  /register-student:
+  /api/register/student:
     post:
       consumes:
       - application/json
@@ -212,4 +341,17 @@ paths:
       summary: Register student user
       tags:
       - Auth
+  /hello:
+    get:
+      description: Returns a simple hello world message
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: Hello
+      summary: Hello World
+      tags:
+      - Health
 swagger: "2.0"

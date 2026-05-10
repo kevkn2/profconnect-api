@@ -10,7 +10,8 @@ type Handler struct {
 	registerAdminUsecase     port.Usecase[inputoutput.RegisterInput, inputoutput.RegisterOutput]
 	registerProfessorUsecase port.Usecase[inputoutput.RegisterProfessorInput, inputoutput.RegisterOutput]
 	registerStudentUsecase   port.Usecase[inputoutput.RegisterStudentInput, inputoutput.RegisterOutput]
-	loginUseCase             port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput]
+	loginUsecase             port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput]
+	refreshUsecase           port.Usecase[inputoutput.RefreshInput, inputoutput.RefreshOutput]
 	professorProfileUsecase  port.Usecase[inputoutput.ProfileInput, inputoutput.ProfessorProfileOutput]
 	studentProfileUsecase    port.Usecase[inputoutput.ProfileInput, inputoutput.StudentProfileOutput]
 }
@@ -20,7 +21,8 @@ func NewHandler(
 	registerAdminUsecase port.Usecase[inputoutput.RegisterInput, inputoutput.RegisterOutput],
 	registerProfessorUsecase port.Usecase[inputoutput.RegisterProfessorInput, inputoutput.RegisterOutput],
 	registerStudentUsecase port.Usecase[inputoutput.RegisterStudentInput, inputoutput.RegisterOutput],
-	loginUseCase port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput],
+	loginUsecase port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput],
+	refreshUsecase port.Usecase[inputoutput.RefreshInput, inputoutput.RefreshOutput],
 	professorProfileUsecase port.Usecase[inputoutput.ProfileInput, inputoutput.ProfessorProfileOutput],
 	studentProfileUsecase port.Usecase[inputoutput.ProfileInput, inputoutput.StudentProfileOutput],
 ) *Handler {
@@ -28,7 +30,8 @@ func NewHandler(
 		registerAdminUsecase:     registerAdminUsecase,
 		registerProfessorUsecase: registerProfessorUsecase,
 		registerStudentUsecase:   registerStudentUsecase,
-		loginUseCase:             loginUseCase,
+		loginUsecase:             loginUsecase,
+		refreshUsecase:           refreshUsecase,
 		professorProfileUsecase:  professorProfileUsecase,
 		studentProfileUsecase:    studentProfileUsecase,
 	}

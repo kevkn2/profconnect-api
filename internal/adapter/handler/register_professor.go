@@ -53,7 +53,7 @@ func (h *Handler) RegisterProfessor(c fiber.Ctx) error {
 		})
 	}
 
-	result, err := h.registerProfessorUsecase.Execute(&input)
+	result, err := h.registerProfessorUsecase.Execute(c.Context(), &input)
 	if err != nil {
 		return HandleError(c, err)
 	}

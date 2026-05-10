@@ -38,7 +38,7 @@ func (h *Handler) Login(c fiber.Ctx) error {
 		})
 	}
 
-	output, err := h.loginUseCase.Execute(&input)
+	output, err := h.loginUsecase.Execute(c.Context(), &input)
 	if err != nil {
 		return HandleError(c, err)
 	}
@@ -50,8 +50,9 @@ func (h *Handler) Login(c fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "login successful",
-		"token":   output.Token,
-		"type":    output.Type,
+		"message":       "login successful",
+		"token":         output.Token,
+		"refresh_token": output.RefreshToken,
+		"type":          output.Type,
 	})
 }

@@ -8,19 +8,18 @@ import (
 	profconnect_utils "profconnect-api/internal/infrastructure/pkg/utils"
 )
 
-type LoginUseCase struct {
+type LoginUsecase struct {
 	userRepository port.UserRepository
 }
 
-func NewLoginUseCase(userRepository port.UserRepository) port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput] {
-	return &LoginUseCase{
+func NewLoginUsecase(userRepository port.UserRepository) port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput] {
+	return &LoginUsecase{
 		userRepository: userRepository,
 	}
 }
 
 // Execute implements port.Usecase.
-func (l *LoginUseCase) Execute(input *inputoutput.LoginInput) (*inputoutput.LoginOutput, error) {
-	ctx := context.Background()
+func (l *LoginUsecase) Execute(ctx context.Context, input *inputoutput.LoginInput) (*inputoutput.LoginOutput, error) {
 	email := input.Email
 	password := input.Password
 
@@ -42,8 +41,14 @@ func (l *LoginUseCase) Execute(input *inputoutput.LoginInput) (*inputoutput.Logi
 		return nil, domain.InternalErr("failed to generate token", err)
 	}
 
+	refreshToken, err := profconnect_utils.GenerateRefreshToken(user.ID)
+	if err != nil {
+		return nil, domain.InternalErr("failed to generate refresh token", err)
+	}
+
 	return &inputoutput.LoginOutput{
-		Token: token,
-		Type:  "Bearer",
+		Token:        token,
+		RefreshToken: refreshToken,
+		Type:         "Bearer",
 	}, nil
 }

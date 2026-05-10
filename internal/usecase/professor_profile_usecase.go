@@ -20,9 +20,7 @@ func NewProfessorProfileUsecase(professorRepository port.ProfessorRepository) po
 }
 
 // Execute implements port.Usecase.
-func (u *professorProfileUsecase) Execute(input *inputoutput.ProfileInput) (*inputoutput.ProfessorProfileOutput, error) {
-	ctx := context.Background()
-
+func (u *professorProfileUsecase) Execute(ctx context.Context, input *inputoutput.ProfileInput) (*inputoutput.ProfessorProfileOutput, error) {
 	professor, err := u.professorRepository.GetByUserID(ctx, input.UserID)
 	if err != nil {
 		return nil, domain.InternalErr("failed to retrieve professor profile", err)
