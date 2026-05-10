@@ -19,10 +19,17 @@ import (
 
 func main() {
 	// Load configuration
-	dbConfig := config.LoadConfig()
+	config := config.LoadConfig()
 
 	// Connect to database
-	db, err := database.Connect(dbConfig)
+	db, err := database.Connect(database.DBConfig{
+		Host:     config.Host,
+		Port:     config.Port,
+		User:     config.User,
+		Password: config.Password,
+		DBName:   config.DBName,
+		SSLMode:  config.SSLMode,
+	})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
@@ -44,6 +51,8 @@ func main() {
 	registerProfessorUsecase := usecase.NewRegisterProfessorUsecase(registerService, professorRepository)
 	registerStudentUsecase := usecase.NewRegisterStudentUsecase(registerService, studentRepository)
 	loginUsecase := usecase.NewLoginUseCase(userRepository)
+	professorProfileUsecase := usecase.NewProfessorProfileUsecase(professorRepository)
+	studentProfileUsecase := usecase.NewStudentProfileUsecase(studentRepository)
 
 	// Initialize handlers (presentation adapters)
 	h := handler.NewHandler(
@@ -51,6 +60,8 @@ func main() {
 		registerProfessorUsecase,
 		registerStudentUsecase,
 		loginUsecase,
+		professorProfileUsecase,
+		studentProfileUsecase,
 	)
 
 	// Initialize Fiber app

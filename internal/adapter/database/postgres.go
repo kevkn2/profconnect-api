@@ -8,7 +8,7 @@ import (
 )
 
 // Config holds database configuration
-type Config struct {
+type DBConfig struct {
 	Host     string
 	Port     string
 	User     string
@@ -18,7 +18,7 @@ type Config struct {
 }
 
 // Connect establishes a connection to PostgreSQL
-func Connect(cfg Config) (*sql.DB, error) {
+func Connect(cfg DBConfig) (*sql.DB, error) {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode)
 

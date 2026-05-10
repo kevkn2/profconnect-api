@@ -11,6 +11,8 @@ type Handler struct {
 	registerProfessorUsecase port.Usecase[inputoutput.RegisterProfessorInput, inputoutput.RegisterOutput]
 	registerStudentUsecase   port.Usecase[inputoutput.RegisterStudentInput, inputoutput.RegisterOutput]
 	loginUseCase             port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput]
+	professorProfileUsecase  port.Usecase[inputoutput.ProfileInput, inputoutput.ProfessorProfileOutput]
+	studentProfileUsecase    port.Usecase[inputoutput.ProfileInput, inputoutput.StudentProfileOutput]
 }
 
 // NewHandler creates a new handler instance
@@ -19,11 +21,15 @@ func NewHandler(
 	registerProfessorUsecase port.Usecase[inputoutput.RegisterProfessorInput, inputoutput.RegisterOutput],
 	registerStudentUsecase port.Usecase[inputoutput.RegisterStudentInput, inputoutput.RegisterOutput],
 	loginUseCase port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput],
+	professorProfileUsecase port.Usecase[inputoutput.ProfileInput, inputoutput.ProfessorProfileOutput],
+	studentProfileUsecase port.Usecase[inputoutput.ProfileInput, inputoutput.StudentProfileOutput],
 ) *Handler {
 	return &Handler{
 		registerAdminUsecase:     registerAdminUsecase,
 		registerProfessorUsecase: registerProfessorUsecase,
 		registerStudentUsecase:   registerStudentUsecase,
 		loginUseCase:             loginUseCase,
+		professorProfileUsecase:  professorProfileUsecase,
+		studentProfileUsecase:    studentProfileUsecase,
 	}
 }

@@ -15,14 +15,16 @@ var (
 type CustomClaims struct {
 	UserID string `json:"user_id"`
 	Email  string `json:"email"`
+	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
 
-// GenerateJWT generates a JWT token for the given user ID and email
-func GenerateJWT(userID, email string) (string, error) {
+// GenerateJWT generates a JWT token for the given user ID, email, and role
+func GenerateJWT(userID, email, role string) (string, error) {
 	claims := CustomClaims{
 		UserID: userID,
 		Email:  email,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenTTL)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

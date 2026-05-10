@@ -37,7 +37,7 @@ func (l *LoginUseCase) Execute(input *inputoutput.LoginInput) (*inputoutput.Logi
 		return nil, domain.Unauthorized("invalid email or password")
 	}
 
-	token, err := profconnect_utils.GenerateJWT(user.ID, user.Email)
+	token, err := profconnect_utils.GenerateJWT(user.ID, user.Email, string(user.Role))
 	if err != nil {
 		return nil, domain.InternalErr("failed to generate token", err)
 	}

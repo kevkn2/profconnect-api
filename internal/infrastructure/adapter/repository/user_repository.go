@@ -24,6 +24,26 @@ func NewUserRepository(queries *generated.Queries) port.UserRepository {
 	}
 }
 
+// GetByID retrieves a user by id
+func (r *userRepository) GetByID(ctx context.Context, id string) (*entities.User, error) {
+	userID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	user, err := r.queries.GetUserByID(ctx, userID)
+	if err != nil {
+		return nil, nil // Return nil for not found to match port contract
+	}
+
+	return &entities.User{
+		ID:    user.ID.String(),
+		Name:  user.Name,
+		Email: user.Email,
+		Role:  constants.Roles(user.Role),
+	}, nil
+}
+
 // GetByEmail retrieves a user by email
 func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entities.User, error) {
 	user, err := r.queries.GetUserByEmail(ctx, email)
