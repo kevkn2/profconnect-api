@@ -9,12 +9,12 @@ SELECT
     p.user_id,
     u.name AS user_name,
     u.email AS user_email,
+    u.role AS user_role,
     p.university,
     p.department 
 FROM professors p
 JOIN users u ON p.user_id = u.id
-
-WHERE user_id = $1;
+WHERE user_id = $1 AND NOT u.deleted;
 
 -- name: UpdateProfessor :one
 WITH updated AS (

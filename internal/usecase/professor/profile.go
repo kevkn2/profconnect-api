@@ -1,4 +1,4 @@
-package usecase
+package professor_usecase
 
 import (
 	"context"
@@ -8,19 +8,17 @@ import (
 	"profconnect-api/internal/domain/port"
 )
 
-type professorProfileUsecase struct {
+type profileUsecase struct {
 	professorRepository port.ProfessorRepository
 }
 
-// NewProfessorProfileUsecase creates a new instance of ProfessorProfileUsecase.
-func NewProfessorProfileUsecase(professorRepository port.ProfessorRepository) port.Usecase[inputoutput.ProfileInput, inputoutput.ProfessorProfileOutput] {
-	return &professorProfileUsecase{
+func NewProfileUsecase(professorRepository port.ProfessorRepository) port.Usecase[inputoutput.ProfileInput, inputoutput.ProfessorProfileOutput] {
+	return &profileUsecase{
 		professorRepository: professorRepository,
 	}
 }
 
-// Execute implements port.Usecase.
-func (u *professorProfileUsecase) Execute(ctx context.Context, input *inputoutput.ProfileInput) (*inputoutput.ProfessorProfileOutput, error) {
+func (u *profileUsecase) Execute(ctx context.Context, input *inputoutput.ProfileInput) (*inputoutput.ProfessorProfileOutput, error) {
 	professor, err := u.professorRepository.GetByUserID(ctx, input.UserID)
 	if err != nil {
 		return nil, domain.InternalErr("failed to retrieve professor profile", err)

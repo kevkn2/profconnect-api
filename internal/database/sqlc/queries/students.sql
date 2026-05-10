@@ -9,13 +9,13 @@ SELECT
     s.user_id,
     u.name AS user_name,
     u.email AS user_email,
+    u.role AS user_role,
     s.university,
     s.department,
     s.research_interests
 FROM students s
 JOIN users u ON s.user_id = u.id
-
-WHERE user_id = $1;
+WHERE user_id = $1 AND NOT u.deleted;
 
 -- name: UpdateStudent :one
 WITH updated AS (

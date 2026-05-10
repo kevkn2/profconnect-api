@@ -8,8 +8,9 @@ type LoginInput struct {
 
 // LoginOutput represents the login response payload
 type LoginOutput struct {
-	Token        string `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	AccessToken  string `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 	RefreshToken string `json:"refresh_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	Role         string `json:"role" example:"student"`
 	Type         string `json:"type" example:"Bearer"`
 }
 
@@ -20,7 +21,7 @@ type RefreshInput struct {
 
 // RefreshOutput represents the refresh-token response payload
 type RefreshOutput struct {
-	Token        string `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	AccessToken  string `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 	RefreshToken string `json:"refresh_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 	Type         string `json:"type" example:"Bearer"`
 }

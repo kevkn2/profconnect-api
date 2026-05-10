@@ -1,4 +1,4 @@
-package usecase
+package auth_usecase
 
 import (
 	"context"
@@ -13,7 +13,6 @@ type registerAdminUsecase struct {
 	registerService port.Service[inputoutput.RegisterInput, entities.User]
 }
 
-// NewRegisterAdminUsecase creates a new instance of RegisterAdminUsecase
 func NewRegisterAdminUsecase(
 	registerService port.Service[inputoutput.RegisterInput, entities.User],
 ) port.Usecase[inputoutput.RegisterInput, inputoutput.RegisterOutput] {
@@ -22,7 +21,6 @@ func NewRegisterAdminUsecase(
 	}
 }
 
-// Execute implements port.Usecase
 func (r *registerAdminUsecase) Execute(ctx context.Context, input *inputoutput.RegisterInput) (*inputoutput.RegisterOutput, error) {
 	createdUser, err := r.registerService.Execute(ctx, &inputoutput.RegisterInput{
 		Name:     input.Name,

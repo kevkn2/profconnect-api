@@ -1,8 +1,9 @@
-package handler
+package shared_handler
 
 import (
 	"log"
 	"net/http"
+
 	"profconnect-api/internal/domain"
 
 	"github.com/gofiber/fiber/v3"
@@ -16,12 +17,10 @@ type ErrorResponse struct {
 
 // HandleError converts domain errors to HTTP responses
 func HandleError(c fiber.Ctx, err error) error {
-	// Check if it's an AppError
 	if appErr, ok := domain.IsAppError(err); ok {
 		return handleAppError(c, appErr)
 	}
 
-	// Handle generic errors as internal server errors
 	log.Printf("Unhandled error: %v", err)
 	return c.Status(http.StatusInternalServerError).JSON(ErrorResponse{
 		Message: "An unexpected error occurred",
@@ -29,11 +28,9 @@ func HandleError(c fiber.Ctx, err error) error {
 	})
 }
 
-// handleAppError maps AppError to HTTP status codes
 func handleAppError(c fiber.Ctx, err *domain.AppError) error {
 	statusCode := errorTypeToStatusCode(err.Type)
 
-	// Log errors with context
 	if err.Err != nil {
 		log.Printf("[%s] %v (caused by: %v)", err.Type, err.Message, err.Err)
 	} else {
@@ -46,24 +43,23 @@ func handleAppError(c fiber.Ctx, err *domain.AppError) error {
 	})
 }
 
-// errorTypeToStatusCode maps domain error types to HTTP status codes
 func errorTypeToStatusCode(errType domain.ErrorType) int {
 	switch errType {
 	case domain.ErrorTypeBadRequest:
-		return http.StatusBadRequest // 400
+		return http.StatusBadRequest
 	case domain.ErrorTypeUnauthorized:
-		return http.StatusUnauthorized // 401
+		return http.StatusUnauthorized
 	case domain.ErrorTypeForbidden:
-		return http.StatusForbidden // 403
+		return http.StatusForbidden
 	case domain.ErrorTypeNotFound:
-		return http.StatusNotFound // 404
+		return http.StatusNotFound
 	case domain.ErrorTypeConflict:
-		return http.StatusConflict // 409
+		return http.StatusConflict
 	case domain.ErrorTypeValidation:
-		return http.StatusUnprocessableEntity // 422
+		return http.StatusUnprocessableEntity
 	case domain.ErrorTypeInternal:
 		fallthrough
 	default:
-		return http.StatusInternalServerError // 500
+		return http.StatusInternalServerError
 	}
 }

@@ -65,6 +65,7 @@ func (s *studentsRepository) GetStudentByUserID(ctx context.Context, userID stri
 			ID:    resultStudent.UserID.String(),
 			Name:  resultStudent.UserName,
 			Email: resultStudent.UserEmail,
+			Role: constants.Roles("student"),
 		},
 		University:        resultStudent.University,
 		Department:        resultStudent.Department,

@@ -4,85 +4,94 @@ import (
 	"log"
 
 	"profconnect-api/internal/adapter/database"
-	"profconnect-api/internal/adapter/handler"
+	authHandler "profconnect-api/internal/adapter/handler/auth"
+	professorHandler "profconnect-api/internal/adapter/handler/professor"
+	studentHandler "profconnect-api/internal/adapter/handler/student"
 	"profconnect-api/internal/adapter/routes"
 	"profconnect-api/internal/config"
 	"profconnect-api/internal/database/sqlc/generated"
 	"profconnect-api/internal/infrastructure/adapter/repository"
 	"profconnect-api/internal/infrastructure/adapter/service"
-	"profconnect-api/internal/usecase"
+	authUsecase "profconnect-api/internal/usecase/auth"
+	professorUsecase "profconnect-api/internal/usecase/professor"
+	studentUsecase "profconnect-api/internal/usecase/student"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
+	"github.com/gofiber/fiber/v3/middleware/logger"
 	"github.com/gofiber/fiber/v3/middleware/static"
 )
 
 func main() {
-	// Load configuration
-	config := config.LoadConfig()
+	cfg := config.LoadConfig()
 
-	// Connect to database
 	db, err := database.Connect(database.DBConfig{
-		Host:     config.Host,
-		Port:     config.Port,
-		User:     config.User,
-		Password: config.Password,
-		DBName:   config.DBName,
-		SSLMode:  config.SSLMode,
+		Host:     cfg.Host,
+		Port:     cfg.Port,
+		User:     cfg.User,
+		Password: cfg.Password,
+		DBName:   cfg.DBName,
+		SSLMode:  cfg.SSLMode,
 	})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer db.Close()
 
-	// Initialize SQLC queries
 	queries := generated.New(db)
 
-	// Initialize repositories (infrastructure adapters)
+	// Repositories
 	userRepository := repository.NewUserRepository(queries)
 	professorRepository := repository.NewProfessorRepository(queries)
 	studentRepository := repository.NewStudentsRepository(queries)
 
-	// Initialize services
+	// Services
 	registerService := service.NewRegisterService(userRepository)
 
-	// Initialize use cases
-	registerAdminUsecase := usecase.NewRegisterAdminUsecase(registerService)
-	registerProfessorUsecase := usecase.NewRegisterProfessorUsecase(registerService, professorRepository)
-	registerStudentUsecase := usecase.NewRegisterStudentUsecase(registerService, studentRepository)
-	loginUsecase := usecase.NewLoginUsecase(userRepository)
-	refreshUsecase := usecase.NewRefreshUsecase(userRepository)
-	professorProfileUsecase := usecase.NewProfessorProfileUsecase(professorRepository)
-	studentProfileUsecase := usecase.NewStudentProfileUsecase(studentRepository)
+	// Auth use cases
+	registerAdminUC := authUsecase.NewRegisterAdminUsecase(registerService)
+	registerProfessorUC := authUsecase.NewRegisterProfessorUsecase(registerService, professorRepository)
+	registerStudentUC := authUsecase.NewRegisterStudentUsecase(registerService, studentRepository)
+	loginUC := authUsecase.NewLoginUsecase(userRepository)
+	refreshUC := authUsecase.NewRefreshUsecase(userRepository)
 
-	// Initialize handlers (presentation adapters)
-	h := handler.NewHandler(
-		registerAdminUsecase,
-		registerProfessorUsecase,
-		registerStudentUsecase,
-		loginUsecase,
-		refreshUsecase,
-		professorProfileUsecase,
-		studentProfileUsecase,
+	// Role-specific use cases
+	professorProfileUC := professorUsecase.NewProfileUsecase(professorRepository)
+	studentProfileUC := studentUsecase.NewProfileUsecase(studentRepository)
+
+	// Handlers
+	authH := authHandler.New(
+		registerAdminUC,
+		registerProfessorUC,
+		registerStudentUC,
+		loginUC,
+		refreshUC,
 	)
+	professorH := professorHandler.New(professorProfileUC)
+	studentH := studentHandler.New(studentProfileUC)
 
-	// Initialize Fiber app
 	app := fiber.New()
+
+	app.Use(logger.New(logger.Config{
+		Format:     "${time} | ${status} | ${method} ${path} | ${latency} | ${ip}\n",
+		TimeFormat: "2006-01-02 15:04:05",
+		TimeZone:   "Local",
+	}))
 
 	app.Use("/docs", static.New("./docs"))
 
-	// Enable CORS middleware
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"http://localhost:3000"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowHeaders: []string{"Content-Type", "Authorization"},
 	}))
 
-	// Initialize router and register routes
-	router := routes.NewRouter(app, h)
+	router := routes.NewRouter(app, authH, professorH, studentH)
 	router.RegisterGeneralRoutes()
 	router.RegisterSwaggerRoutes()
+	router.RegisterAuthRoutes()
+	router.RegisterStudentRoutes()
+	router.RegisterProfessorRoutes()
 
-	// Start the server on port 3000
 	app.Listen(":3001")
 }

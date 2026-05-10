@@ -1,7 +1,8 @@
-package usecase
+package auth_usecase
 
 import (
 	"context"
+
 	"profconnect-api/internal/domain"
 	inputoutput "profconnect-api/internal/domain/input_output"
 	"profconnect-api/internal/domain/port"
@@ -18,12 +19,8 @@ func NewLoginUsecase(userRepository port.UserRepository) port.Usecase[inputoutpu
 	}
 }
 
-// Execute implements port.Usecase.
 func (l *LoginUsecase) Execute(ctx context.Context, input *inputoutput.LoginInput) (*inputoutput.LoginOutput, error) {
-	email := input.Email
-	password := input.Password
-
-	user, err := l.userRepository.GetByEmail(ctx, email)
+	user, err := l.userRepository.GetByEmail(ctx, input.Email)
 	if err != nil {
 		return nil, domain.InternalErr("failed to retrieve user", err)
 	}
@@ -32,7 +29,7 @@ func (l *LoginUsecase) Execute(ctx context.Context, input *inputoutput.LoginInpu
 		return nil, domain.Unauthorized("invalid email or password")
 	}
 
-	if err := profconnect_utils.VerifyPassword(user.HashedPassword, password); err != nil {
+	if err := profconnect_utils.VerifyPassword(user.HashedPassword, input.Password); err != nil {
 		return nil, domain.Unauthorized("invalid email or password")
 	}
 
@@ -47,8 +44,9 @@ func (l *LoginUsecase) Execute(ctx context.Context, input *inputoutput.LoginInpu
 	}
 
 	return &inputoutput.LoginOutput{
-		Token:        token,
+		AccessToken:  token,
 		RefreshToken: refreshToken,
+		Role:         string(user.Role),
 		Type:         "Bearer",
 	}, nil
 }

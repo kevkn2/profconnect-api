@@ -1,4 +1,4 @@
-package usecase
+package auth_usecase
 
 import (
 	"context"
@@ -14,7 +14,6 @@ type registerProfessorUsecase struct {
 	professorRepository port.ProfessorRepository
 }
 
-// NewRegisterProfessorUsecase creates a new instance of RegisterProfessorUsecase
 func NewRegisterProfessorUsecase(
 	registerService port.Service[inputoutput.RegisterInput, entities.User],
 	professorRepository port.ProfessorRepository,
@@ -25,7 +24,6 @@ func NewRegisterProfessorUsecase(
 	}
 }
 
-// Execute implements port.Usecase
 func (r *registerProfessorUsecase) Execute(ctx context.Context, input *inputoutput.RegisterProfessorInput) (*inputoutput.RegisterOutput, error) {
 	createdUser, err := r.registerService.Execute(ctx, &inputoutput.RegisterInput{
 		Name:     input.Name,

@@ -1,29 +1,33 @@
 package routes
 
 import (
+	"profconnect-api/internal/adapter/handler"
 	"profconnect-api/internal/adapter/middleware"
 	"profconnect-api/internal/domain/constants"
 )
 
 func (r *Router) RegisterGeneralRoutes() {
-	r.app.Get("/", r.handler.HelloWorld)
+	r.app.Get("/", handler.HelloWorld)
+}
 
-	r.app.Post("/api/register/admin", r.handler.RegisterAdmin)
-	r.app.Post("/api/register/professor", r.handler.RegisterProfessor)
-	r.app.Post("/api/register/student", r.handler.RegisterStudent)
-	r.app.Post("/api/login", r.handler.Login)
-	r.app.Post("/api/refresh", r.handler.Refresh)
+func (r *Router) RegisterAuthRoutes() {
+	authGroup := r.app.Group("/api/auth")
 
-	r.app.Get(
-		"/api/profile/professor",
-		r.handler.ProfessorProfile,
-		middleware.JWTAuth(),
-		middleware.RequireRole(constants.Professor),
-	)
-	r.app.Get(
-		"/api/profile/student",
-		r.handler.StudentProfile,
-		middleware.JWTAuth(),
-		middleware.RequireRole(constants.Student),
-	)
+	authGroup.Post("/register/admin", r.auth.RegisterAdmin)
+	authGroup.Post("/register/professor", r.auth.RegisterProfessor)
+	authGroup.Post("/register/student", r.auth.RegisterStudent)
+	authGroup.Post("/login", r.auth.Login)
+	authGroup.Post("/refresh", r.auth.Refresh)
+}
+
+func (r *Router) RegisterStudentRoutes() {
+	studentGroup := r.app.Group("/api/student", middleware.JWTAuth(), middleware.RequireRole(constants.Student))
+
+	studentGroup.Get("/profile", r.student.Profile)
+}
+
+func (r *Router) RegisterProfessorRoutes() {
+	professorGroup := r.app.Group("/api/professor", middleware.JWTAuth(), middleware.RequireRole(constants.Professor))
+
+	professorGroup.Get("/profile", r.professor.Profile)
 }

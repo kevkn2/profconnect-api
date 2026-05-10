@@ -47,8 +47,12 @@ func (r *userRepository) GetByID(ctx context.Context, id string) (*entities.User
 // GetByEmail retrieves a user by email
 func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entities.User, error) {
 	user, err := r.queries.GetUserByEmail(ctx, email)
+	if user == (generated.GetUserByEmailRow{}) {
+		return nil, nil
+	}
+
 	if err != nil {
-		return nil, nil // Return nil for not found to match port contract
+		return nil, err 
 	}
 
 	return mapGetUserByEmailRowToEntity(user), nil
@@ -60,6 +64,7 @@ func (r *userRepository) Create(ctx context.Context, user *entities.User) (*enti
 		Name:           user.Name,
 		Email:          user.Email,
 		HashedPassword: user.HashedPassword,
+		Role: 		 string(user.Role),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create user: %w", err)

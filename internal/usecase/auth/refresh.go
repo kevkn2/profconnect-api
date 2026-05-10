@@ -1,4 +1,4 @@
-package usecase
+package auth_usecase
 
 import (
 	"context"
@@ -13,16 +13,12 @@ type refreshUsecase struct {
 	userRepository port.UserRepository
 }
 
-// NewRefreshUsecase creates a new instance of RefreshUsecase.
 func NewRefreshUsecase(userRepository port.UserRepository) port.Usecase[inputoutput.RefreshInput, inputoutput.RefreshOutput] {
 	return &refreshUsecase{
 		userRepository: userRepository,
 	}
 }
 
-// Execute implements port.Usecase. It verifies the supplied refresh token,
-// reloads the user (so a stale refresh token cannot grant access after a
-// role change or deletion), and mints a new access + refresh pair.
 func (r *refreshUsecase) Execute(ctx context.Context, input *inputoutput.RefreshInput) (*inputoutput.RefreshOutput, error) {
 	if input.RefreshToken == "" {
 		return nil, domain.BadRequest("refresh_token is required")
@@ -52,7 +48,7 @@ func (r *refreshUsecase) Execute(ctx context.Context, input *inputoutput.Refresh
 	}
 
 	return &inputoutput.RefreshOutput{
-		Token:        accessToken,
+		AccessToken:  accessToken,
 		RefreshToken: newRefreshToken,
 		Type:         "Bearer",
 	}, nil

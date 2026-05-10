@@ -4,8 +4,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func (h *Handler) Swagger(c fiber.Ctx) error {
-
+func Swagger(c fiber.Ctx) error {
 	return c.Type("html").SendString(`
 <!DOCTYPE html>
 <html>

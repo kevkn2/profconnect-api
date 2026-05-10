@@ -9,7 +9,7 @@ import "github.com/gofiber/fiber/v3"
 // @Produce json
 // @Success 200 Hello World!
 // @Router /hello [get]
-func (h *Handler) HelloWorld(c fiber.Ctx) error {
+func HelloWorld(c fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"message": "Hello World!",
 	})
