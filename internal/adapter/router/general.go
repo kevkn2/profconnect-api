@@ -1,4 +1,4 @@
-package routes
+package router
 
 import (
 	"profconnect-api/internal/adapter/handler"
@@ -21,13 +21,13 @@ func (r *Router) RegisterAuthRoutes() {
 }
 
 func (r *Router) RegisterStudentRoutes() {
-	studentGroup := r.app.Group("/api/student", middleware.JWTAuth(), middleware.RequireRole(constants.Student))
+	studentGroup := r.app.Group("/api/student", r.authMW.JWT(), middleware.RequireRole(constants.Student))
 
 	studentGroup.Get("/profile", r.student.Profile)
 }
 
 func (r *Router) RegisterProfessorRoutes() {
-	professorGroup := r.app.Group("/api/professor", middleware.JWTAuth(), middleware.RequireRole(constants.Professor))
+	professorGroup := r.app.Group("/api/professor", r.authMW.JWT(), middleware.RequireRole(constants.Professor))
 
 	professorGroup.Get("/profile", r.professor.Profile)
 }

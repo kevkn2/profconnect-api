@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"profconnect-api/internal/domain/constants"
-	profconnect_utils "profconnect-api/internal/infrastructure/pkg/utils"
+	"profconnect-api/internal/domain/port"
 
 	"github.com/gofiber/fiber/v3"
 )
@@ -21,9 +21,19 @@ type errorResponse struct {
 	Type    string `json:"type,omitempty"`
 }
 
-// JWTAuth decodes the bearer token, verifies its signature, and stores
+// Auth groups authentication middlewares bound to a TokenService.
+type Auth struct {
+	tokenService port.TokenService
+}
+
+// NewAuth constructs an Auth middleware bundle.
+func NewAuth(tokenService port.TokenService) *Auth {
+	return &Auth{tokenService: tokenService}
+}
+
+// JWT decodes the bearer token, verifies its signature, and stores
 // the user_id, email, and role in fiber Locals for downstream handlers.
-func JWTAuth() fiber.Handler {
+func (a *Auth) JWT() fiber.Handler {
 	return func(c fiber.Ctx) error {
 		header := c.Get("Authorization")
 		if header == "" {
@@ -41,7 +51,7 @@ func JWTAuth() fiber.Handler {
 			})
 		}
 
-		claims, err := profconnect_utils.VerifyJWT(parts[1])
+		claims, err := a.tokenService.VerifyAccess(parts[1])
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(errorResponse{
 				Message: "invalid or expired token",
@@ -58,7 +68,7 @@ func JWTAuth() fiber.Handler {
 }
 
 // RequireRole returns a middleware that enforces the caller's role matches
-// the expected role. Must be chained after JWTAuth.
+// the expected role. Must be chained after JWT.
 func RequireRole(expected constants.Roles) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		role, ok := c.Locals(LocalsRole).(string)

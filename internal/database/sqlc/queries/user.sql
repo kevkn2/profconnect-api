@@ -17,5 +17,7 @@ RETURNING id, name, email, role;
 
 -- name: DeleteUserByID :exec
 UPDATE users
-SET deleted = TRUE, updated_at = CURRENT_TIMESTAMP
+SET deleted = TRUE,
+    email = email || '_del' || id::TEXT,
+    updated_at = CURRENT_TIMESTAMP
 WHERE id = $1 AND NOT deleted;

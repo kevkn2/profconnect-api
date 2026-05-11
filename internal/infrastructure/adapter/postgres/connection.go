@@ -1,4 +1,4 @@
-package database
+package postgres
 
 import (
 	"database/sql"
@@ -8,7 +8,7 @@ import (
 )
 
 // Config holds database configuration
-type DBConfig struct {
+type Config struct {
 	Host     string
 	Port     string
 	User     string
@@ -18,7 +18,7 @@ type DBConfig struct {
 }
 
 // Connect establishes a connection to PostgreSQL
-func Connect(cfg DBConfig) (*sql.DB, error) {
+func Connect(cfg Config) (*sql.DB, error) {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode)
 
@@ -27,9 +27,7 @@ func Connect(cfg DBConfig) (*sql.DB, error) {
 		return nil, err
 	}
 
-	// Test the connection
-	err = db.Ping()
-	if err != nil {
+	if err := db.Ping(); err != nil {
 		return nil, err
 	}
 

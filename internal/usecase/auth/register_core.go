@@ -1,44 +1,44 @@
-package service
+package auth_usecase
 
 import (
 	"context"
+
 	"profconnect-api/internal/domain"
 	"profconnect-api/internal/domain/constants"
 	"profconnect-api/internal/domain/entities"
 	inputoutput "profconnect-api/internal/domain/input_output"
 	"profconnect-api/internal/domain/port"
-	profconnect_utils "profconnect-api/internal/infrastructure/pkg/utils"
 )
 
-type registerService struct {
+type registerCoreUsecase struct {
 	userRepository port.UserRepository
+	passwordHasher port.PasswordHasher
 }
 
-func NewRegisterService(userRepository port.UserRepository) port.Service[inputoutput.RegisterInput, entities.User] {
-	return &registerService{
+func NewRegisterCoreUsecase(
+	userRepository port.UserRepository,
+	passwordHasher port.PasswordHasher,
+) port.Service[inputoutput.RegisterInput, entities.User] {
+	return &registerCoreUsecase{
 		userRepository: userRepository,
+		passwordHasher: passwordHasher,
 	}
 }
 
-// Execute implements port.Service.
-func (r *registerService) Execute(ctx context.Context, input *inputoutput.RegisterInput) (*entities.User, error) {
-	// Check if user with this email already exists
-	userExist, err := r.userRepository.GetByEmail(ctx, input.Email)
+func (r *registerCoreUsecase) Execute(ctx context.Context, input *inputoutput.RegisterInput) (*entities.User, error) {
+	existing, err := r.userRepository.GetByEmail(ctx, input.Email)
 	if err != nil {
 		return nil, domain.InternalErr("failed to check existing user", err)
 	}
-
-	if userExist != nil {
+	if existing != nil {
 		return nil, domain.Conflict("user with this email already exists")
 	}
 
-	// Hash the password
-	hashedPassword, err := profconnect_utils.HashPassword(input.Password)
+	hashedPassword, err := r.passwordHasher.Hash(input.Password)
 	if err != nil {
 		return nil, domain.InternalErr("failed to hash password", err)
 	}
 
-	// Create new user
 	newUser := &entities.User{
 		Name:           input.Name,
 		Email:          input.Email,
@@ -46,7 +46,6 @@ func (r *registerService) Execute(ctx context.Context, input *inputoutput.Regist
 		Role:           constants.Roles(input.Role),
 	}
 
-	// Save user to database
 	createdUser, err := r.userRepository.Create(ctx, newUser)
 	if err != nil {
 		return nil, domain.InternalErr("failed to create user", err)

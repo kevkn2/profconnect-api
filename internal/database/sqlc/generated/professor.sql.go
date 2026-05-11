@@ -48,6 +48,7 @@ SELECT
     p.user_id,
     u.name AS user_name,
     u.email AS user_email,
+    u.role AS user_role,
     p.university,
     p.department 
 FROM professors p
@@ -60,6 +61,7 @@ type GetProfessorByUserIDRow struct {
 	UserID     uuid.UUID `json:"user_id"`
 	UserName   string    `json:"user_name"`
 	UserEmail  string    `json:"user_email"`
+	UserRole   string    `json:"user_role"`
 	University string    `json:"university"`
 	Department string    `json:"department"`
 }
@@ -72,6 +74,7 @@ func (q *Queries) GetProfessorByUserID(ctx context.Context, userID uuid.UUID) (G
 		&i.UserID,
 		&i.UserName,
 		&i.UserEmail,
+		&i.UserRole,
 		&i.University,
 		&i.Department,
 	)

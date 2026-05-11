@@ -6,16 +6,23 @@ import (
 	"profconnect-api/internal/domain"
 	inputoutput "profconnect-api/internal/domain/input_output"
 	"profconnect-api/internal/domain/port"
-	profconnect_utils "profconnect-api/internal/infrastructure/pkg/utils"
 )
 
 type LoginUsecase struct {
 	userRepository port.UserRepository
+	passwordHasher port.PasswordHasher
+	tokenService   port.TokenService
 }
 
-func NewLoginUsecase(userRepository port.UserRepository) port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput] {
+func NewLoginUsecase(
+	userRepository port.UserRepository,
+	passwordHasher port.PasswordHasher,
+	tokenService port.TokenService,
+) port.Usecase[inputoutput.LoginInput, inputoutput.LoginOutput] {
 	return &LoginUsecase{
 		userRepository: userRepository,
+		passwordHasher: passwordHasher,
+		tokenService:   tokenService,
 	}
 }
 
@@ -29,22 +36,22 @@ func (l *LoginUsecase) Execute(ctx context.Context, input *inputoutput.LoginInpu
 		return nil, domain.Unauthorized("invalid email or password")
 	}
 
-	if err := profconnect_utils.VerifyPassword(user.HashedPassword, input.Password); err != nil {
+	if err := l.passwordHasher.Verify(user.HashedPassword, input.Password); err != nil {
 		return nil, domain.Unauthorized("invalid email or password")
 	}
 
-	token, err := profconnect_utils.GenerateJWT(user.ID, user.Email, string(user.Role))
+	accessToken, err := l.tokenService.GenerateAccess(user.ID, user.Email, string(user.Role))
 	if err != nil {
 		return nil, domain.InternalErr("failed to generate token", err)
 	}
 
-	refreshToken, err := profconnect_utils.GenerateRefreshToken(user.ID)
+	refreshToken, err := l.tokenService.GenerateRefresh(user.ID)
 	if err != nil {
 		return nil, domain.InternalErr("failed to generate refresh token", err)
 	}
 
 	return &inputoutput.LoginOutput{
-		AccessToken:  token,
+		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		Role:         string(user.Role),
 		Type:         "Bearer",

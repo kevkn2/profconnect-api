@@ -2,16 +2,19 @@ package main
 
 import (
 	"log"
+	"time"
 
-	"profconnect-api/internal/adapter/database"
 	authHandler "profconnect-api/internal/adapter/handler/auth"
 	professorHandler "profconnect-api/internal/adapter/handler/professor"
 	studentHandler "profconnect-api/internal/adapter/handler/student"
-	"profconnect-api/internal/adapter/routes"
+	"profconnect-api/internal/adapter/middleware"
+	"profconnect-api/internal/adapter/router"
 	"profconnect-api/internal/config"
 	"profconnect-api/internal/database/sqlc/generated"
+	"profconnect-api/internal/infrastructure/adapter/crypto"
+	"profconnect-api/internal/infrastructure/adapter/postgres"
 	"profconnect-api/internal/infrastructure/adapter/repository"
-	"profconnect-api/internal/infrastructure/adapter/service"
+	"profconnect-api/internal/infrastructure/adapter/token"
 	authUsecase "profconnect-api/internal/usecase/auth"
 	professorUsecase "profconnect-api/internal/usecase/professor"
 	studentUsecase "profconnect-api/internal/usecase/student"
@@ -22,10 +25,16 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/static"
 )
 
+const (
+	accessTokenTTL  = 24 * time.Hour
+	refreshTokenTTL = 7 * 24 * time.Hour
+	tokenIssuer     = "profconnect-api"
+)
+
 func main() {
 	cfg := config.LoadConfig()
 
-	db, err := database.Connect(database.DBConfig{
+	db, err := postgres.Connect(postgres.Config{
 		Host:     cfg.Host,
 		Port:     cfg.Port,
 		User:     cfg.User,
@@ -45,15 +54,17 @@ func main() {
 	professorRepository := repository.NewProfessorRepository(queries)
 	studentRepository := repository.NewStudentsRepository(queries)
 
-	// Services
-	registerService := service.NewRegisterService(userRepository)
+	// Infrastructure services (port implementations)
+	passwordHasher := crypto.NewBcryptHasher()
+	tokenService := token.NewJWTService(cfg.JWTSecret, accessTokenTTL, refreshTokenTTL, tokenIssuer)
 
 	// Auth use cases
-	registerAdminUC := authUsecase.NewRegisterAdminUsecase(registerService)
-	registerProfessorUC := authUsecase.NewRegisterProfessorUsecase(registerService, professorRepository)
-	registerStudentUC := authUsecase.NewRegisterStudentUsecase(registerService, studentRepository)
-	loginUC := authUsecase.NewLoginUsecase(userRepository)
-	refreshUC := authUsecase.NewRefreshUsecase(userRepository)
+	registerCoreUC := authUsecase.NewRegisterCoreUsecase(userRepository, passwordHasher)
+	registerAdminUC := authUsecase.NewRegisterAdminUsecase(registerCoreUC)
+	registerProfessorUC := authUsecase.NewRegisterProfessorUsecase(registerCoreUC, professorRepository)
+	registerStudentUC := authUsecase.NewRegisterStudentUsecase(registerCoreUC, studentRepository)
+	loginUC := authUsecase.NewLoginUsecase(userRepository, passwordHasher, tokenService)
+	refreshUC := authUsecase.NewRefreshUsecase(userRepository, tokenService)
 
 	// Role-specific use cases
 	professorProfileUC := professorUsecase.NewProfileUsecase(professorRepository)
@@ -69,6 +80,9 @@ func main() {
 	)
 	professorH := professorHandler.New(professorProfileUC)
 	studentH := studentHandler.New(studentProfileUC)
+
+	// Middleware
+	authMW := middleware.NewAuth(tokenService)
 
 	app := fiber.New()
 
@@ -86,12 +100,12 @@ func main() {
 		AllowHeaders: []string{"Content-Type", "Authorization"},
 	}))
 
-	router := routes.NewRouter(app, authH, professorH, studentH)
-	router.RegisterGeneralRoutes()
-	router.RegisterSwaggerRoutes()
-	router.RegisterAuthRoutes()
-	router.RegisterStudentRoutes()
-	router.RegisterProfessorRoutes()
+	r := router.NewRouter(app, authH, professorH, studentH, authMW)
+	r.RegisterGeneralRoutes()
+	r.RegisterSwaggerRoutes()
+	r.RegisterAuthRoutes()
+	r.RegisterStudentRoutes()
+	r.RegisterProfessorRoutes()
 
 	app.Listen(":3001")
 }
