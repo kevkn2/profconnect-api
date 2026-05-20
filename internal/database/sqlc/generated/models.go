@@ -19,6 +19,27 @@ type Professor struct {
 	UpdatedAt  sql.NullTime `json:"updated_at"`
 }
 
+type Project struct {
+	ID          uuid.UUID    `json:"id"`
+	ProfessorID uuid.UUID    `json:"professor_id"`
+	Title       string       `json:"title"`
+	Description string       `json:"description"`
+	Slots       int32        `json:"slots"`
+	Status      string       `json:"status"`
+	CreatedAt   sql.NullTime `json:"created_at"`
+	UpdatedAt   sql.NullTime `json:"updated_at"`
+}
+
+type ProjectApplication struct {
+	ID        uuid.UUID      `json:"id"`
+	ProjectID uuid.UUID      `json:"project_id"`
+	StudentID uuid.UUID      `json:"student_id"`
+	Status    string         `json:"status"`
+	Message   sql.NullString `json:"message"`
+	CreatedAt sql.NullTime   `json:"created_at"`
+	UpdatedAt sql.NullTime   `json:"updated_at"`
+}
+
 type Student struct {
 	ID                uuid.UUID      `json:"id"`
 	UserID            uuid.UUID      `json:"user_id"`

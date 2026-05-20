@@ -3,6 +3,7 @@ package router
 import (
 	authHandler "profconnect-api/internal/adapter/handler/auth"
 	professorHandler "profconnect-api/internal/adapter/handler/professor"
+	projectHandler "profconnect-api/internal/adapter/handler/project"
 	studentHandler "profconnect-api/internal/adapter/handler/student"
 	"profconnect-api/internal/adapter/middleware"
 
@@ -15,6 +16,7 @@ type Router struct {
 	auth      *authHandler.Handler
 	professor *professorHandler.Handler
 	student   *studentHandler.Handler
+	project   *projectHandler.Handler
 	authMW    *middleware.Auth
 }
 
@@ -24,6 +26,7 @@ func NewRouter(
 	auth *authHandler.Handler,
 	professor *professorHandler.Handler,
 	student *studentHandler.Handler,
+	project *projectHandler.Handler,
 	authMW *middleware.Auth,
 ) *Router {
 	return &Router{
@@ -31,6 +34,7 @@ func NewRouter(
 		auth:      auth,
 		professor: professor,
 		student:   student,
+		project:   project,
 		authMW:    authMW,
 	}
 }

@@ -1,4 +1,48 @@
 definitions:
+  inputoutput.ApplyProjectInput:
+    properties:
+      message:
+        type: string
+    type: object
+  inputoutput.CreateProjectInput:
+    properties:
+      description:
+        type: string
+      slots:
+        type: integer
+      title:
+        type: string
+    type: object
+  inputoutput.EmptyOutput:
+    properties:
+      message:
+        type: string
+    type: object
+  inputoutput.ListApplicationsOutput:
+    properties:
+      applications:
+        items:
+          $ref: '#/definitions/inputoutput.ProjectApplicationOutput'
+        type: array
+    type: object
+  inputoutput.ListProjectApplicationsByProjectOutput:
+    properties:
+      approved_applications:
+        items:
+          $ref: '#/definitions/inputoutput.ProjectApplicationOutput'
+        type: array
+      pending_applications:
+        items:
+          $ref: '#/definitions/inputoutput.ProjectApplicationOutput'
+        type: array
+    type: object
+  inputoutput.ListProjectsOutput:
+    properties:
+      projects:
+        items:
+          $ref: '#/definitions/inputoutput.ProjectOutput'
+        type: array
+    type: object
   inputoutput.LoginInput:
     properties:
       email:
@@ -10,11 +54,14 @@ definitions:
     type: object
   inputoutput.LoginOutput:
     properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
       refresh_token:
         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         type: string
-      token:
-        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      role:
+        example: student
         type: string
       type:
         example: Bearer
@@ -37,6 +84,75 @@ definitions:
       user_id:
         type: string
     type: object
+  inputoutput.ProjectApplicationOutput:
+    properties:
+      id:
+        type: string
+      message:
+        type: string
+      project:
+        $ref: '#/definitions/inputoutput.ProjectShortForApp'
+      status:
+        type: string
+      student:
+        $ref: '#/definitions/inputoutput.ProjectStudentBrief'
+    type: object
+  inputoutput.ProjectOutput:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      professor:
+        $ref: '#/definitions/inputoutput.ProjectProfessorBrief'
+      professor_id:
+        type: string
+      slots:
+        type: integer
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  inputoutput.ProjectProfessorBrief:
+    properties:
+      department:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      university:
+        type: string
+      user_id:
+        type: string
+    type: object
+  inputoutput.ProjectShortForApp:
+    properties:
+      description:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  inputoutput.ProjectStudentBrief:
+    properties:
+      department:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      research_interests:
+        type: string
+      student_id:
+        type: string
+      university:
+        type: string
+      user_id:
+        type: string
+    type: object
   inputoutput.RefreshInput:
     properties:
       refresh_token:
@@ -45,10 +161,10 @@ definitions:
     type: object
   inputoutput.RefreshOutput:
     properties:
-      refresh_token:
+      access_token:
         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         type: string
-      token:
+      refresh_token:
         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         type: string
       type:
@@ -103,6 +219,11 @@ definitions:
       role:
         type: string
       university:
+        type: string
+    type: object
+  inputoutput.ReviewApplicationInput:
+    properties:
+      status:
         type: string
     type: object
   inputoutput.StudentProfileOutput:
@@ -314,6 +435,193 @@ paths:
       summary: Get professor profile
       tags:
       - Professor
+  /api/professor/projects:
+    post:
+      consumes:
+      - application/json
+      description: Professor creates a new project. The professor_id is sourced from
+        the JWT.
+      parameters:
+      - description: Project payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inputoutput.CreateProjectInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/inputoutput.ProjectOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a project
+      tags:
+      - Professor
+  /api/professor/projects/{id}/applications:
+    get:
+      description: Professor lists applications for a project they own.
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.ListProjectApplicationsByProjectOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List applications for a project
+      tags:
+      - Professor
+  /api/professor/projects/{id}/applications/{appId}:
+    patch:
+      consumes:
+      - application/json
+      description: Professor approves or rejects an application on a project they
+        own.
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Application ID
+        in: path
+        name: appId
+        required: true
+        type: string
+      - description: Review payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inputoutput.ReviewApplicationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.ProjectApplicationOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Approve or reject an application
+      tags:
+      - Professor
+  /api/projects:
+    get:
+      description: Returns all projects available for students to browse.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.ListProjectsOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List all projects
+      tags:
+      - Project
+  /api/projects/{id}:
+    get:
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.ProjectOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a project by id
+      tags:
+      - Project
+  /api/student/applications:
+    get:
+      description: Student lists their own applications across all projects.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.ListApplicationsOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List my applications
+      tags:
+      - Student
   /api/student/profile:
     get:
       description: Returns the authenticated student's profile derived from JWT
@@ -339,6 +647,92 @@ paths:
       security:
       - BearerAuth: []
       summary: Get student profile
+      tags:
+      - Student
+  /api/student/projects/{id}/applications:
+    post:
+      consumes:
+      - application/json
+      description: Student applies to a project. Status is set to pending.
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Optional message
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/inputoutput.ApplyProjectInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/inputoutput.ProjectApplicationOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Apply to a project
+      tags:
+      - Student
+  /api/student/projects/{id}/applications/{appId}:
+    delete:
+      description: Student withdraws a pending or rejected application.
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Application ID
+        in: path
+        name: appId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.EmptyOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Withdraw an application
       tags:
       - Student
   /hello:

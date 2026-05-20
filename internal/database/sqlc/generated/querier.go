@@ -11,15 +11,28 @@ import (
 )
 
 type Querier interface {
+	CountApprovedApplications(ctx context.Context, projectID uuid.UUID) (int64, error)
 	CreateProfessor(ctx context.Context, arg CreateProfessorParams) (CreateProfessorRow, error)
+	CreateProject(ctx context.Context, arg CreateProjectParams) (CreateProjectRow, error)
+	CreateProjectApplication(ctx context.Context, arg CreateProjectApplicationParams) (CreateProjectApplicationRow, error)
 	CreateStudent(ctx context.Context, arg CreateStudentParams) (CreateStudentRow, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
+	DeleteProjectApplication(ctx context.Context, id uuid.UUID) error
 	DeleteUserByID(ctx context.Context, id uuid.UUID) error
 	GetProfessorByUserID(ctx context.Context, userID uuid.UUID) (GetProfessorByUserIDRow, error)
+	GetProjectApplicationByID(ctx context.Context, id uuid.UUID) (GetProjectApplicationByIDRow, error)
+	GetProjectApplicationByProjectAndStudent(ctx context.Context, arg GetProjectApplicationByProjectAndStudentParams) (GetProjectApplicationByProjectAndStudentRow, error)
+	GetProjectByID(ctx context.Context, id uuid.UUID) (GetProjectByIDRow, error)
 	GetStudentByUserID(ctx context.Context, userID uuid.UUID) (GetStudentByUserIDRow, error)
 	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow, error)
+	ListApplicationsByProject(ctx context.Context, projectID uuid.UUID) ([]ListApplicationsByProjectRow, error)
+	ListApplicationsByStudent(ctx context.Context, studentID uuid.UUID) ([]ListApplicationsByStudentRow, error)
+	ListProjects(ctx context.Context) ([]ListProjectsRow, error)
+	ListProjectsByProfessor(ctx context.Context, professorID uuid.UUID) ([]ListProjectsByProfessorRow, error)
 	UpdateProfessor(ctx context.Context, arg UpdateProfessorParams) (UpdateProfessorRow, error)
+	UpdateProjectApplicationStatus(ctx context.Context, arg UpdateProjectApplicationStatusParams) (UpdateProjectApplicationStatusRow, error)
+	UpdateProjectStatus(ctx context.Context, arg UpdateProjectStatusParams) error
 	UpdateStudent(ctx context.Context, arg UpdateStudentParams) (UpdateStudentRow, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error)
 }

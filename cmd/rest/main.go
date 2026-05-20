@@ -6,6 +6,7 @@ import (
 
 	authHandler "profconnect-api/internal/adapter/handler/auth"
 	professorHandler "profconnect-api/internal/adapter/handler/professor"
+	projectHandler "profconnect-api/internal/adapter/handler/project"
 	studentHandler "profconnect-api/internal/adapter/handler/student"
 	"profconnect-api/internal/adapter/middleware"
 	"profconnect-api/internal/adapter/router"
@@ -17,6 +18,7 @@ import (
 	"profconnect-api/internal/infrastructure/adapter/token"
 	authUsecase "profconnect-api/internal/usecase/auth"
 	professorUsecase "profconnect-api/internal/usecase/professor"
+	projectUsecase "profconnect-api/internal/usecase/project"
 	studentUsecase "profconnect-api/internal/usecase/student"
 
 	"github.com/gofiber/fiber/v3"
@@ -53,6 +55,8 @@ func main() {
 	userRepository := repository.NewUserRepository(queries)
 	professorRepository := repository.NewProfessorRepository(queries)
 	studentRepository := repository.NewStudentsRepository(queries)
+	projectRepository := repository.NewProjectRepository(queries)
+	projectApplicationRepository := repository.NewProjectApplicationRepository(queries)
 
 	// Infrastructure services (port implementations)
 	passwordHasher := crypto.NewBcryptHasher()
@@ -66,9 +70,22 @@ func main() {
 	loginUC := authUsecase.NewLoginUsecase(userRepository, passwordHasher, tokenService)
 	refreshUC := authUsecase.NewRefreshUsecase(userRepository, tokenService)
 
-	// Role-specific use cases
+	// Professor use cases
 	professorProfileUC := professorUsecase.NewProfileUsecase(professorRepository)
+	createProjectUC := professorUsecase.NewCreateProjectUsecase(projectRepository, professorRepository)
+	listApplicationsByProjectUC := professorUsecase.NewListApplicationsByProjectUsecase(projectRepository, projectApplicationRepository, professorRepository)
+	reviewApplicationUC := professorUsecase.NewReviewApplicationUsecase(projectRepository, projectApplicationRepository, professorRepository)
+
+	// Student use cases
 	studentProfileUC := studentUsecase.NewProfileUsecase(studentRepository)
+	applyProjectUC := studentUsecase.NewApplyProjectUsecase(projectRepository, projectApplicationRepository, studentRepository)
+	withdrawApplicationUC := studentUsecase.NewWithdrawApplicationUsecase(projectApplicationRepository, studentRepository)
+	listMyApplicationsUC := studentUsecase.NewListMyApplicationsUsecase(projectApplicationRepository, studentRepository)
+
+	// Generic project use cases
+	listProjectsUC := projectUsecase.NewListProjectsUsecase(projectRepository)
+	getProjectUC := projectUsecase.NewGetProjectUsecase(projectRepository)
+	
 
 	// Handlers
 	authH := authHandler.New(
@@ -78,8 +95,22 @@ func main() {
 		loginUC,
 		refreshUC,
 	)
-	professorH := professorHandler.New(professorProfileUC)
-	studentH := studentHandler.New(studentProfileUC)
+	professorH := professorHandler.New(
+		professorProfileUC,
+		createProjectUC,
+		listApplicationsByProjectUC,
+		reviewApplicationUC,
+	)
+	studentH := studentHandler.New(
+		studentProfileUC,
+		applyProjectUC,
+		withdrawApplicationUC,
+		listMyApplicationsUC,
+	)
+	projectH := projectHandler.New(
+		listProjectsUC,
+		getProjectUC,
+	)
 
 	// Middleware
 	authMW := middleware.NewAuth(tokenService)
@@ -100,12 +131,13 @@ func main() {
 		AllowHeaders: []string{"Content-Type", "Authorization"},
 	}))
 
-	r := router.NewRouter(app, authH, professorH, studentH, authMW)
+	r := router.NewRouter(app, authH, professorH, studentH, projectH, authMW)
 	r.RegisterGeneralRoutes()
 	r.RegisterSwaggerRoutes()
 	r.RegisterAuthRoutes()
 	r.RegisterStudentRoutes()
 	r.RegisterProfessorRoutes()
+	r.RegisterProjectRoutes()
 
 	app.Listen(":3001")
 }
