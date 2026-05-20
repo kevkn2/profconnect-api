@@ -60,6 +60,14 @@ JOIN projects p ON pa.project_id = p.id
 WHERE pa.student_id = $1
 ORDER BY pa.created_at DESC;
 
+-- name: CheckApplicationsByProjectAndStudent :one
+SELECT EXISTS (
+    SELECT 1 FROM project_applications
+    WHERE student_id = $1
+        AND project_id = $2
+        AND status IN ('pending', 'approved')
+);
+
 -- name: UpdateProjectApplicationStatus :one
 UPDATE project_applications
 SET status = $1,

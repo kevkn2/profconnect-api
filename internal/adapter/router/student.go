@@ -10,6 +10,7 @@ func (r *Router) RegisterStudentRoutes() {
 
 	studentGroup.Get("/profile", r.student.Profile)
 	studentGroup.Get("/applications", r.student.ListMyApplications)
+	studentGroup.Get("/projects/:id/applications", r.student.ListApplicationsPerProject)
 	studentGroup.Post("/projects/:id/applications", r.student.ApplyProject)
 	studentGroup.Delete("/projects/:id/applications/:appId", r.student.WithdrawApplication)
 }

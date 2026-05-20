@@ -21,6 +21,7 @@ type ProjectApplicationRepository interface {
 	GetByProjectAndStudent(ctx context.Context, projectID, studentID string) (*entities.ProjectApplication, error)
 	ListByProject(ctx context.Context, projectID string) ([]*entities.ProjectApplication, error)
 	ListByStudent(ctx context.Context, studentID string) ([]*StudentApplicationView, error)
+	CheckApplicationStatus(ctx context.Context, studentID, projectID string) (bool, error)
 	UpdateStatus(ctx context.Context, id string, status constants.ApplicationStatus) (*entities.ProjectApplication, error)
 	Delete(ctx context.Context, id string) error
 }

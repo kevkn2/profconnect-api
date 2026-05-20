@@ -188,6 +188,29 @@ func (r *projectApplicationRepository) ListByStudent(ctx context.Context, studen
 	return result, nil
 }
 
+
+func (r *projectApplicationRepository) CheckApplicationStatus(ctx context.Context, studentID, projectID string) (bool, error) {
+	studentUUID, err := uuid.Parse(studentID)
+	if err != nil {
+		return false, fmt.Errorf("invalid student id: %w", err)
+	}
+
+	projectUUID, err := uuid.Parse(projectID)
+	if err != nil {
+		return false, fmt.Errorf("invalid project id: %w", err)
+	}
+
+	rows, err := r.queries.CheckApplicationsByProjectAndStudent(ctx, generated.CheckApplicationsByProjectAndStudentParams{
+		StudentID: studentUUID,
+		ProjectID: projectUUID,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	return rows, nil
+}
+
 func (r *projectApplicationRepository) UpdateStatus(ctx context.Context, id string, status constants.ApplicationStatus) (*entities.ProjectApplication, error) {
 	appID, err := uuid.Parse(id)
 	if err != nil {

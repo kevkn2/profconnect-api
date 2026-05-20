@@ -118,3 +118,12 @@ type EmptyOutput struct {
 type ListMyApplicationsInput struct {
 	StudentUserID string `json:"-"`
 }
+
+type CheckApplicationStatusInput struct {
+	StudentUserID string `json:"-"`
+	ProjectID     string `json:"-"`
+}
+
+type CheckApplicationStatusOutput struct {
+	Exists bool `json:"exists"`
+}

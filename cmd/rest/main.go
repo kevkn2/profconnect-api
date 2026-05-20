@@ -81,6 +81,7 @@ func main() {
 	applyProjectUC := studentUsecase.NewApplyProjectUsecase(projectRepository, projectApplicationRepository, studentRepository)
 	withdrawApplicationUC := studentUsecase.NewWithdrawApplicationUsecase(projectApplicationRepository, studentRepository)
 	listMyApplicationsUC := studentUsecase.NewListMyApplicationsUsecase(projectApplicationRepository, studentRepository)
+	listApplicationsByProjectIDUC := studentUsecase.NewListApplicationsPerIDUsecase(projectApplicationRepository, studentRepository)
 
 	// Generic project use cases
 	listProjectsUC := projectUsecase.NewListProjectsUsecase(projectRepository)
@@ -106,6 +107,7 @@ func main() {
 		applyProjectUC,
 		withdrawApplicationUC,
 		listMyApplicationsUC,
+		listApplicationsByProjectIDUC,
 	)
 	projectH := projectHandler.New(
 		listProjectsUC,

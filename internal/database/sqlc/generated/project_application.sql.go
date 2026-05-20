@@ -12,6 +12,27 @@ import (
 	"github.com/google/uuid"
 )
 
+const checkApplicationsByProjectAndStudent = `-- name: CheckApplicationsByProjectAndStudent :one
+SELECT EXISTS (
+    SELECT 1 FROM project_applications
+    WHERE student_id = $1
+        AND project_id = $2
+        AND status IN ('pending', 'approved')
+)
+`
+
+type CheckApplicationsByProjectAndStudentParams struct {
+	StudentID uuid.UUID `json:"student_id"`
+	ProjectID uuid.UUID `json:"project_id"`
+}
+
+func (q *Queries) CheckApplicationsByProjectAndStudent(ctx context.Context, arg CheckApplicationsByProjectAndStudentParams) (bool, error) {
+	row := q.db.QueryRowContext(ctx, checkApplicationsByProjectAndStudent, arg.StudentID, arg.ProjectID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createProjectApplication = `-- name: CreateProjectApplication :one
 INSERT INTO project_applications (project_id, student_id, status, message)
 VALUES ($1, $2, $3, $4)

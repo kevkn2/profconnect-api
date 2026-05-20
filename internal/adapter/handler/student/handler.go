@@ -11,6 +11,7 @@ type Handler struct {
 	applyProjectUsecase        port.Usecase[inputoutput.ApplyProjectInput, inputoutput.ProjectApplicationOutput]
 	withdrawApplicationUsecase port.Usecase[inputoutput.WithdrawApplicationInput, inputoutput.EmptyOutput]
 	listMyApplicationsUsecase  port.Usecase[inputoutput.ListMyApplicationsInput, inputoutput.ListApplicationsOutput]
+	listApplicationsPerIDUsecase port.Usecase[inputoutput.CheckApplicationStatusInput, inputoutput.CheckApplicationStatusOutput]
 }
 
 // New creates a new student handler.
@@ -19,11 +20,13 @@ func New(
 	applyProjectUsecase port.Usecase[inputoutput.ApplyProjectInput, inputoutput.ProjectApplicationOutput],
 	withdrawApplicationUsecase port.Usecase[inputoutput.WithdrawApplicationInput, inputoutput.EmptyOutput],
 	listMyApplicationsUsecase port.Usecase[inputoutput.ListMyApplicationsInput, inputoutput.ListApplicationsOutput],
+	listApplicationsPerIDUsecase port.Usecase[inputoutput.CheckApplicationStatusInput, inputoutput.CheckApplicationStatusOutput],
 ) *Handler {
 	return &Handler{
 		profileUsecase:             profileUsecase,
 		applyProjectUsecase:        applyProjectUsecase,
 		withdrawApplicationUsecase: withdrawApplicationUsecase,
 		listMyApplicationsUsecase:  listMyApplicationsUsecase,
+		listApplicationsPerIDUsecase: listApplicationsPerIDUsecase,
 	}
 }

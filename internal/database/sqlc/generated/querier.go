@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	CheckApplicationsByProjectAndStudent(ctx context.Context, arg CheckApplicationsByProjectAndStudentParams) (bool, error)
 	CountApprovedApplications(ctx context.Context, projectID uuid.UUID) (int64, error)
 	CreateProfessor(ctx context.Context, arg CreateProfessorParams) (CreateProfessorRow, error)
 	CreateProject(ctx context.Context, arg CreateProjectParams) (CreateProjectRow, error)
