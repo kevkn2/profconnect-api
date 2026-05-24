@@ -40,6 +40,30 @@ type ProjectApplication struct {
 	UpdatedAt sql.NullTime   `json:"updated_at"`
 }
 
+type ProjectInvitation struct {
+	ID          uuid.UUID      `json:"id"`
+	ProjectID   uuid.UUID      `json:"project_id"`
+	StudentID   uuid.UUID      `json:"student_id"`
+	Status      string         `json:"status"`
+	Message     sql.NullString `json:"message"`
+	RespondedAt sql.NullTime   `json:"responded_at"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
+type ProjectMember struct {
+	ID          uuid.UUID     `json:"id"`
+	ProjectID   uuid.UUID     `json:"project_id"`
+	StudentID   uuid.UUID     `json:"student_id"`
+	Source      string        `json:"source"`
+	SourceRefID uuid.NullUUID `json:"source_ref_id"`
+	Status      string        `json:"status"`
+	JoinedAt    sql.NullTime  `json:"joined_at"`
+	LeftAt      sql.NullTime  `json:"left_at"`
+	CreatedAt   sql.NullTime  `json:"created_at"`
+	UpdatedAt   sql.NullTime  `json:"updated_at"`
+}
+
 type Student struct {
 	ID                uuid.UUID      `json:"id"`
 	UserID            uuid.UUID      `json:"user_id"`

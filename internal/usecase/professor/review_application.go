@@ -5,6 +5,7 @@ import (
 
 	"profconnect-api/internal/domain"
 	"profconnect-api/internal/domain/constants"
+	"profconnect-api/internal/domain/entities"
 	inputoutput "profconnect-api/internal/domain/input_output"
 	"profconnect-api/internal/domain/port"
 )
@@ -12,17 +13,20 @@ import (
 type reviewApplicationUsecase struct {
 	projectRepository     port.ProjectRepository
 	applicationRepository port.ProjectApplicationRepository
+	memberRepository      port.ProjectMemberRepository
 	professorRepository   port.ProfessorRepository
 }
 
 func NewReviewApplicationUsecase(
 	projectRepository port.ProjectRepository,
 	applicationRepository port.ProjectApplicationRepository,
+	memberRepository port.ProjectMemberRepository,
 	professorRepository port.ProfessorRepository,
 ) port.Usecase[inputoutput.ReviewApplicationInput, inputoutput.ProjectApplicationOutput] {
 	return &reviewApplicationUsecase{
 		projectRepository:     projectRepository,
 		applicationRepository: applicationRepository,
+		memberRepository:      memberRepository,
 		professorRepository:   professorRepository,
 	}
 }
@@ -69,11 +73,11 @@ func (u *reviewApplicationUsecase) Execute(ctx context.Context, input *inputoutp
 	}
 
 	if requested == constants.ApplicationStatusApproved {
-		approvedCount, err := u.projectRepository.CountApprovedApplications(ctx, project.ID)
+		activeCount, err := u.memberRepository.CountActive(ctx, project.ID)
 		if err != nil {
-			return nil, domain.InternalErr("failed to count approvals", err)
+			return nil, domain.InternalErr("failed to count active members", err)
 		}
-		if approvedCount >= project.Slots {
+		if activeCount >= project.Slots {
 			return nil, domain.Conflict("all slots have already been filled")
 		}
 	}
@@ -84,36 +88,46 @@ func (u *reviewApplicationUsecase) Execute(ctx context.Context, input *inputoutp
 	}
 
 	if requested == constants.ApplicationStatusApproved {
-		approvedCount, err := u.projectRepository.CountApprovedApplications(ctx, project.ID)
+		_, err := u.memberRepository.Create(ctx, &entities.ProjectMember{
+			Project:     project,
+			Student:     application.Student,
+			Source:      constants.MemberSourceApplication,
+			SourceRefID: application.ID,
+			Status:      constants.MemberStatusActive,
+		})
 		if err != nil {
-			return nil, domain.InternalErr("failed to recount approvals", err)
+			return nil, domain.InternalErr("failed to add project member", err)
 		}
-		if approvedCount >= project.Slots {
+
+		activeCount, err := u.memberRepository.CountActive(ctx, project.ID)
+		if err != nil {
+			return nil, domain.InternalErr("failed to recount active members", err)
+		}
+		if activeCount >= project.Slots && project.Status == constants.ProjectStatusOpen {
 			if err := u.projectRepository.UpdateStatus(ctx, project.ID, constants.ProjectStatusClosed); err != nil {
 				return nil, domain.InternalErr("failed to close project", err)
 			}
 		}
 	}
 
-	// Restore student context for the response.
 	updated.Student = application.Student
 	return &inputoutput.ProjectApplicationOutput{
-		ID:        updated.ID,
-		Project:   &inputoutput.ProjectShortForApp{
-			Title: project.Title,
+		ID: updated.ID,
+		Project: &inputoutput.ProjectShortForApp{
+			Title:       project.Title,
 			Description: project.Description,
-			Status: string(project.Status),
+			Status:      string(project.Status),
 		},
-		Student:   &inputoutput.ProjectStudentBrief{
-			StudentID: updated.Student.ID,
-			UserID: updated.Student.User.ID,
-			Email: updated.Student.User.Email,
-			Name: updated.Student.User.Name,
-			University: updated.Student.University,
-			Department: updated.Student.Department,
+		Student: &inputoutput.ProjectStudentBrief{
+			StudentID:         updated.Student.ID,
+			UserID:            updated.Student.User.ID,
+			Email:             updated.Student.User.Email,
+			Name:              updated.Student.User.Name,
+			University:        updated.Student.University,
+			Department:        updated.Student.Department,
 			ResearchInterests: updated.Student.ResearchInterests,
 		},
-		Status:    string(updated.Status),
-		Message:   updated.Message,
+		Status:  string(updated.Status),
+		Message: updated.Message,
 	}, nil
 }

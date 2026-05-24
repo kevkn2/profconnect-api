@@ -57,6 +57,8 @@ func main() {
 	studentRepository := repository.NewStudentsRepository(queries)
 	projectRepository := repository.NewProjectRepository(queries)
 	projectApplicationRepository := repository.NewProjectApplicationRepository(queries)
+	projectMemberRepository := repository.NewProjectMemberRepository(queries)
+	projectInvitationRepository := repository.NewProjectInvitationRepository(queries)
 
 	// Infrastructure services (port implementations)
 	passwordHasher := crypto.NewBcryptHasher()
@@ -74,7 +76,12 @@ func main() {
 	professorProfileUC := professorUsecase.NewProfileUsecase(professorRepository)
 	createProjectUC := professorUsecase.NewCreateProjectUsecase(projectRepository, professorRepository)
 	listApplicationsByProjectUC := professorUsecase.NewListApplicationsByProjectUsecase(projectRepository, projectApplicationRepository, professorRepository)
-	reviewApplicationUC := professorUsecase.NewReviewApplicationUsecase(projectRepository, projectApplicationRepository, professorRepository)
+	reviewApplicationUC := professorUsecase.NewReviewApplicationUsecase(projectRepository, projectApplicationRepository, projectMemberRepository, professorRepository)
+	sendInvitationUC := professorUsecase.NewSendInvitationUsecase(projectRepository, projectInvitationRepository, projectMemberRepository, projectApplicationRepository, professorRepository, studentRepository)
+	listInvitationsByProjectUC := professorUsecase.NewListInvitationsByProjectUsecase(projectRepository, projectInvitationRepository, professorRepository)
+	cancelInvitationUC := professorUsecase.NewCancelInvitationUsecase(projectRepository, projectInvitationRepository, professorRepository)
+	removeMemberUC := professorUsecase.NewRemoveMemberUsecase(projectRepository, projectMemberRepository, professorRepository)
+	listStudentsUC := professorUsecase.NewListStudentsUsecase(studentRepository)
 
 	// Student use cases
 	studentProfileUC := studentUsecase.NewProfileUsecase(studentRepository)
@@ -82,11 +89,15 @@ func main() {
 	withdrawApplicationUC := studentUsecase.NewWithdrawApplicationUsecase(projectApplicationRepository, studentRepository)
 	listMyApplicationsUC := studentUsecase.NewListMyApplicationsUsecase(projectApplicationRepository, studentRepository)
 	listApplicationsByProjectIDUC := studentUsecase.NewListApplicationsPerIDUsecase(projectApplicationRepository, studentRepository)
+	listMyInvitationsUC := studentUsecase.NewListMyInvitationsUsecase(projectInvitationRepository, studentRepository)
+	respondInvitationUC := studentUsecase.NewRespondInvitationUsecase(projectRepository, projectInvitationRepository, projectMemberRepository, studentRepository)
+	listMyProjectsUC := studentUsecase.NewListMyProjectsUsecase(projectMemberRepository, studentRepository)
+	leaveProjectUC := studentUsecase.NewLeaveProjectUsecase(projectRepository, projectMemberRepository, studentRepository)
 
 	// Generic project use cases
 	listProjectsUC := projectUsecase.NewListProjectsUsecase(projectRepository)
 	getProjectUC := projectUsecase.NewGetProjectUsecase(projectRepository)
-	
+	listMembersByProjectUC := projectUsecase.NewListMembersByProjectUsecase(projectRepository, projectMemberRepository)
 
 	// Handlers
 	authH := authHandler.New(
@@ -101,6 +112,11 @@ func main() {
 		createProjectUC,
 		listApplicationsByProjectUC,
 		reviewApplicationUC,
+		sendInvitationUC,
+		listInvitationsByProjectUC,
+		cancelInvitationUC,
+		removeMemberUC,
+		listStudentsUC,
 	)
 	studentH := studentHandler.New(
 		studentProfileUC,
@@ -108,10 +124,15 @@ func main() {
 		withdrawApplicationUC,
 		listMyApplicationsUC,
 		listApplicationsByProjectIDUC,
+		listMyInvitationsUC,
+		respondInvitationUC,
+		listMyProjectsUC,
+		leaveProjectUC,
 	)
 	projectH := projectHandler.New(
 		listProjectsUC,
 		getProjectUC,
+		listMembersByProjectUC,
 	)
 
 	// Middleware

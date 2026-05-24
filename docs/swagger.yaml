@@ -4,6 +4,11 @@ definitions:
       message:
         type: string
     type: object
+  inputoutput.CheckApplicationStatusOutput:
+    properties:
+      exists:
+        type: boolean
+    type: object
   inputoutput.CreateProjectInput:
     properties:
       description:
@@ -25,6 +30,27 @@ definitions:
           $ref: '#/definitions/inputoutput.ProjectApplicationOutput'
         type: array
     type: object
+  inputoutput.ListInvitationsOutput:
+    properties:
+      invitations:
+        items:
+          $ref: '#/definitions/inputoutput.ProjectInvitationOutput'
+        type: array
+    type: object
+  inputoutput.ListMembersOutput:
+    properties:
+      members:
+        items:
+          $ref: '#/definitions/inputoutput.ProjectMemberOutput'
+        type: array
+    type: object
+  inputoutput.ListMyProjectsOutput:
+    properties:
+      memberships:
+        items:
+          $ref: '#/definitions/inputoutput.ProjectMemberOutput'
+        type: array
+    type: object
   inputoutput.ListProjectApplicationsByProjectOutput:
     properties:
       approved_applications:
@@ -41,6 +67,13 @@ definitions:
       projects:
         items:
           $ref: '#/definitions/inputoutput.ProjectOutput'
+        type: array
+    type: object
+  inputoutput.ListStudentsOutput:
+    properties:
+      students:
+        items:
+          $ref: '#/definitions/inputoutput.ProjectStudentBrief'
         type: array
     type: object
   inputoutput.LoginInput:
@@ -92,6 +125,40 @@ definitions:
         type: string
       project:
         $ref: '#/definitions/inputoutput.ProjectShortForApp'
+      status:
+        type: string
+      student:
+        $ref: '#/definitions/inputoutput.ProjectStudentBrief'
+    type: object
+  inputoutput.ProjectInvitationOutput:
+    properties:
+      id:
+        type: string
+      message:
+        type: string
+      project:
+        $ref: '#/definitions/inputoutput.ProjectShortForApp'
+      responded_at:
+        type: string
+      status:
+        type: string
+      student:
+        $ref: '#/definitions/inputoutput.ProjectStudentBrief'
+    type: object
+  inputoutput.ProjectMemberOutput:
+    properties:
+      id:
+        type: string
+      joined_at:
+        type: string
+      left_at:
+        type: string
+      project:
+        $ref: '#/definitions/inputoutput.ProjectShortForApp'
+      source:
+        type: string
+      source_ref_id:
+        type: string
       status:
         type: string
       student:
@@ -221,9 +288,21 @@ definitions:
       university:
         type: string
     type: object
+  inputoutput.RespondInvitationInput:
+    properties:
+      status:
+        type: string
+    type: object
   inputoutput.ReviewApplicationInput:
     properties:
       status:
+        type: string
+    type: object
+  inputoutput.SendInvitationInput:
+    properties:
+      message:
+        type: string
+      student_id:
         type: string
     type: object
   inputoutput.StudentProfileOutput:
@@ -556,6 +635,185 @@ paths:
       summary: Approve or reject an application
       tags:
       - Professor
+  /api/professor/projects/{id}/invitations:
+    get:
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.ListInvitationsOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List invitations sent for a project
+      tags:
+      - Professor
+    post:
+      consumes:
+      - application/json
+      description: Professor sends an invitation to a student for a project they own.
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Invitation payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inputoutput.SendInvitationInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/inputoutput.ProjectInvitationOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Invite a student to a project
+      tags:
+      - Professor
+  /api/professor/projects/{id}/invitations/{invId}:
+    delete:
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Invitation ID
+        in: path
+        name: invId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.EmptyOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Cancel a pending invitation
+      tags:
+      - Professor
+  /api/professor/projects/{id}/members/{memberId}:
+    delete:
+      description: Professor removes a member from a project they own. Frees the slot.
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Member ID
+        in: path
+        name: memberId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.EmptyOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Remove a member from a project
+      tags:
+      - Professor
+  /api/professor/students:
+    get:
+      description: Returns the directory of students. Used by the frontend to pick
+        whom to invite.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.ListStudentsOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List all students
+      tags:
+      - Professor
   /api/projects:
     get:
       description: Returns all projects available for students to browse.
@@ -603,6 +861,36 @@ paths:
       summary: Get a project by id
       tags:
       - Project
+  /api/projects/{id}/members:
+    get:
+      description: Returns the roster of students who joined the project — via approved
+        application or accepted invitation.
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.ListMembersOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List members of a project
+      tags:
+      - Project
   /api/student/applications:
     get:
       description: Student lists their own applications across all projects.
@@ -620,6 +908,70 @@ paths:
       security:
       - BearerAuth: []
       summary: List my applications
+      tags:
+      - Student
+  /api/student/invitations:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.ListInvitationsOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List my invitations
+      tags:
+      - Student
+  /api/student/invitations/{invId}:
+    patch:
+      consumes:
+      - application/json
+      description: Student accepts or declines an invitation. On accept, the student
+        is added as a project member.
+      parameters:
+      - description: Invitation ID
+        in: path
+        name: invId
+        required: true
+        type: string
+      - description: Response payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inputoutput.RespondInvitationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.ProjectInvitationOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Accept or decline an invitation
       tags:
       - Student
   /api/student/profile:
@@ -649,16 +1001,34 @@ paths:
       summary: Get student profile
       tags:
       - Student
-  /api/student/projects/{id}/applications:
+  /api/student/projects:
     get:
-      description: Student lists their applications for a specific project.
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/inputoutput.ListApplicationsOutput'
+            $ref: '#/definitions/inputoutput.ListMyProjectsOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List projects I am a member of
+      tags:
+      - Student
+  /api/student/projects/{id}/applications:
+    get:
+      description: Check application status if pending or accepted.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.CheckApplicationStatusOutput'
         "401":
           description: Unauthorized
           schema:
@@ -751,6 +1121,36 @@ paths:
       security:
       - BearerAuth: []
       summary: Withdraw an application
+      tags:
+      - Student
+  /api/student/projects/{id}/membership:
+    delete:
+      description: Student leaves a project they are an active member of. Frees the
+        slot.
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inputoutput.EmptyOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/shared_handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Leave a project
       tags:
       - Student
   /hello:

@@ -51,8 +51,50 @@ func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (C
 	return i, err
 }
 
+const getStudentByID = `-- name: GetStudentByID :one
+SELECT
+    s.id,
+    s.user_id,
+    u.name AS user_name,
+    u.email AS user_email,
+    u.role AS user_role,
+    s.university,
+    s.department,
+    s.research_interests
+FROM students s
+JOIN users u ON s.user_id = u.id
+WHERE s.id = $1 AND NOT u.deleted
+`
+
+type GetStudentByIDRow struct {
+	ID                uuid.UUID      `json:"id"`
+	UserID            uuid.UUID      `json:"user_id"`
+	UserName          string         `json:"user_name"`
+	UserEmail         string         `json:"user_email"`
+	UserRole          string         `json:"user_role"`
+	University        string         `json:"university"`
+	Department        string         `json:"department"`
+	ResearchInterests sql.NullString `json:"research_interests"`
+}
+
+func (q *Queries) GetStudentByID(ctx context.Context, id uuid.UUID) (GetStudentByIDRow, error) {
+	row := q.db.QueryRowContext(ctx, getStudentByID, id)
+	var i GetStudentByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.UserName,
+		&i.UserEmail,
+		&i.UserRole,
+		&i.University,
+		&i.Department,
+		&i.ResearchInterests,
+	)
+	return i, err
+}
+
 const getStudentByUserID = `-- name: GetStudentByUserID :one
-SELECT 
+SELECT
     s.id,
     s.user_id,
     u.name AS user_name,
@@ -91,6 +133,62 @@ func (q *Queries) GetStudentByUserID(ctx context.Context, userID uuid.UUID) (Get
 		&i.ResearchInterests,
 	)
 	return i, err
+}
+
+const listStudents = `-- name: ListStudents :many
+SELECT
+    s.id,
+    s.user_id,
+    u.name AS user_name,
+    u.email AS user_email,
+    s.university,
+    s.department,
+    s.research_interests
+FROM students s
+JOIN users u ON s.user_id = u.id
+WHERE NOT u.deleted
+ORDER BY u.name ASC
+`
+
+type ListStudentsRow struct {
+	ID                uuid.UUID      `json:"id"`
+	UserID            uuid.UUID      `json:"user_id"`
+	UserName          string         `json:"user_name"`
+	UserEmail         string         `json:"user_email"`
+	University        string         `json:"university"`
+	Department        string         `json:"department"`
+	ResearchInterests sql.NullString `json:"research_interests"`
+}
+
+func (q *Queries) ListStudents(ctx context.Context) ([]ListStudentsRow, error) {
+	rows, err := q.db.QueryContext(ctx, listStudents)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListStudentsRow
+	for rows.Next() {
+		var i ListStudentsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.UserName,
+			&i.UserEmail,
+			&i.University,
+			&i.Department,
+			&i.ResearchInterests,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateStudent = `-- name: UpdateStudent :one

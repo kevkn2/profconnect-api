@@ -47,6 +47,35 @@ func (s *studentsRepository) CreateStudent(ctx context.Context, student *entitie
 	}, nil
 }
 
+// GetStudentByID implements port.StudentsRepository.
+func (s *studentsRepository) GetStudentByID(ctx context.Context, id string) (*entities.Student, error) {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid student id: %w", err)
+	}
+
+	row, err := s.queries.GetStudentByID(ctx, parsedID)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get student: %w", err)
+	}
+
+	return &entities.Student{
+		ID: row.ID.String(),
+		User: &entities.User{
+			ID:    row.UserID.String(),
+			Name:  row.UserName,
+			Email: row.UserEmail,
+			Role:  constants.Student,
+		},
+		University:        row.University,
+		Department:        row.Department,
+		ResearchInterests: row.ResearchInterests.String,
+	}, nil
+}
+
 // GetStudentByUserID implements port.StudentsRepository.
 func (s *studentsRepository) GetStudentByUserID(ctx context.Context, userID string) (*entities.Student, error) {
 	parsedUserID, err := uuid.Parse(userID)
@@ -71,6 +100,31 @@ func (s *studentsRepository) GetStudentByUserID(ctx context.Context, userID stri
 		Department:        resultStudent.Department,
 		ResearchInterests: resultStudent.ResearchInterests.String,
 	}, nil
+}
+
+// ListStudents implements port.StudentsRepository.
+func (s *studentsRepository) ListStudents(ctx context.Context) ([]*entities.Student, error) {
+	rows, err := s.queries.ListStudents(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list students: %w", err)
+	}
+
+	result := make([]*entities.Student, 0, len(rows))
+	for _, row := range rows {
+		result = append(result, &entities.Student{
+			ID: row.ID.String(),
+			User: &entities.User{
+				ID:    row.UserID.String(),
+				Name:  row.UserName,
+				Email: row.UserEmail,
+				Role:  constants.Student,
+			},
+			University:        row.University,
+			Department:        row.Department,
+			ResearchInterests: row.ResearchInterests.String,
+		})
+	}
+	return result, nil
 }
 
 // UpdateStudent implements port.StudentsRepository.

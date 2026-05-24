@@ -12,7 +12,6 @@ type ProjectRepository interface {
 	List(ctx context.Context) ([]*entities.Project, error)
 	ListByProfessor(ctx context.Context, professorID string) ([]*entities.Project, error)
 	UpdateStatus(ctx context.Context, id string, status constants.ProjectStatus) error
-	CountApprovedApplications(ctx context.Context, projectID string) (int, error)
 }
 
 type ProjectApplicationRepository interface {

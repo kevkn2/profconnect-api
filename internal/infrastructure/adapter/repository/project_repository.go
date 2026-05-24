@@ -115,19 +115,6 @@ func (r *projectRepository) UpdateStatus(ctx context.Context, id string, status 
 	})
 }
 
-func (r *projectRepository) CountApprovedApplications(ctx context.Context, projectID string) (int, error) {
-	id, err := uuid.Parse(projectID)
-	if err != nil {
-		return 0, fmt.Errorf("invalid project id: %w", err)
-	}
-
-	count, err := r.queries.CountApprovedApplications(ctx, id)
-	if err != nil {
-		return 0, err
-	}
-	return int(count), nil
-}
-
 func rowToProject(
 	id, professorID uuid.UUID,
 	title, description string,

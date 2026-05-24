@@ -104,7 +104,7 @@ setup-db: docker-up
 	sleep 5
 	migrate -path ./migrations -database "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(DB_SSLMODE)" up
 
-docs:
+docs-generate:
 	@echo "Generating API documentation..."
 	swag init -g ./cmd/rest/main.go -o ./docs
 	@echo "✓ Documentation generated!"

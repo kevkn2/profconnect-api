@@ -474,6 +474,285 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/professor/projects/{id}/invitations": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Professor"
+                ],
+                "summary": "List invitations sent for a project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.ListInvitationsOutput"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Professor sends an invitation to a student for a project they own.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Professor"
+                ],
+                "summary": "Invite a student to a project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Invitation payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.SendInvitationInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.ProjectInvitationOutput"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/professor/projects/{id}/invitations/{invId}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Professor"
+                ],
+                "summary": "Cancel a pending invitation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Invitation ID",
+                        "name": "invId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.EmptyOutput"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/professor/projects/{id}/members/{memberId}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Professor removes a member from a project they own. Frees the slot.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Professor"
+                ],
+                "summary": "Remove a member from a project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Member ID",
+                        "name": "memberId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.EmptyOutput"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/professor/students": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the directory of students. Used by the frontend to pick whom to invite.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Professor"
+                ],
+                "summary": "List all students",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.ListStudentsOutput"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/projects": {
             "get": {
                 "security": [
@@ -550,6 +829,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/projects/{id}/members": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the roster of students who joined the project — via approved application or accepted invitation.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "List members of a project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.ListMembersOutput"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/student/applications": {
             "get": {
                 "security": [
@@ -574,6 +899,106 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/student/invitations": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "List my invitations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.ListInvitationsOutput"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/student/invitations/{invId}": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Student accepts or declines an invitation. On accept, the student is added as a project member.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Accept or decline an invitation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Invitation ID",
+                        "name": "invId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Response payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.RespondInvitationInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.ProjectInvitationOutput"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
                         "schema": {
                             "$ref": "#/definitions/shared_handler.ErrorResponse"
                         }
@@ -624,6 +1049,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/student/projects": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "List projects I am a member of",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.ListMyProjectsOutput"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/student/projects/{id}/applications": {
             "get": {
                 "security": [
@@ -631,7 +1086,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Student lists their applications for a specific project.",
+                "description": "Check application status if pending or accepted.",
                 "produces": [
                     "application/json"
                 ],
@@ -643,7 +1098,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/inputoutput.ListApplicationsOutput"
+                            "$ref": "#/definitions/inputoutput.CheckApplicationStatusOutput"
                         }
                     },
                     "401": {
@@ -787,6 +1242,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/student/projects/{id}/membership": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Student leaves a project they are an active member of. Frees the slot.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Leave a project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inputoutput.EmptyOutput"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/shared_handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/hello": {
             "get": {
                 "description": "Returns a simple hello world message",
@@ -814,6 +1315,14 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "inputoutput.CheckApplicationStatusOutput": {
+            "type": "object",
+            "properties": {
+                "exists": {
+                    "type": "boolean"
                 }
             }
         },
@@ -850,6 +1359,39 @@ const docTemplate = `{
                 }
             }
         },
+        "inputoutput.ListInvitationsOutput": {
+            "type": "object",
+            "properties": {
+                "invitations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/inputoutput.ProjectInvitationOutput"
+                    }
+                }
+            }
+        },
+        "inputoutput.ListMembersOutput": {
+            "type": "object",
+            "properties": {
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/inputoutput.ProjectMemberOutput"
+                    }
+                }
+            }
+        },
+        "inputoutput.ListMyProjectsOutput": {
+            "type": "object",
+            "properties": {
+                "memberships": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/inputoutput.ProjectMemberOutput"
+                    }
+                }
+            }
+        },
         "inputoutput.ListProjectApplicationsByProjectOutput": {
             "type": "object",
             "properties": {
@@ -874,6 +1416,17 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/inputoutput.ProjectOutput"
+                    }
+                }
+            }
+        },
+        "inputoutput.ListStudentsOutput": {
+            "type": "object",
+            "properties": {
+                "students": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/inputoutput.ProjectStudentBrief"
                     }
                 }
             }
@@ -949,6 +1502,58 @@ const docTemplate = `{
                 },
                 "project": {
                     "$ref": "#/definitions/inputoutput.ProjectShortForApp"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "student": {
+                    "$ref": "#/definitions/inputoutput.ProjectStudentBrief"
+                }
+            }
+        },
+        "inputoutput.ProjectInvitationOutput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "project": {
+                    "$ref": "#/definitions/inputoutput.ProjectShortForApp"
+                },
+                "responded_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "student": {
+                    "$ref": "#/definitions/inputoutput.ProjectStudentBrief"
+                }
+            }
+        },
+        "inputoutput.ProjectMemberOutput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "joined_at": {
+                    "type": "string"
+                },
+                "left_at": {
+                    "type": "string"
+                },
+                "project": {
+                    "$ref": "#/definitions/inputoutput.ProjectShortForApp"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "source_ref_id": {
+                    "type": "string"
                 },
                 "status": {
                     "type": "string"
@@ -1147,10 +1752,29 @@ const docTemplate = `{
                 }
             }
         },
+        "inputoutput.RespondInvitationInput": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "inputoutput.ReviewApplicationInput": {
             "type": "object",
             "properties": {
                 "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "inputoutput.SendInvitationInput": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "student_id": {
                     "type": "string"
                 }
             }

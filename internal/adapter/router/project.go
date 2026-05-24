@@ -5,4 +5,5 @@ func (r *Router) RegisterProjectRoutes() {
 	authed := r.app.Group("/api/projects", r.authMW.JWT())
 	authed.Get("/", r.project.ListProjects)
 	authed.Get("/:id", r.project.GetProject)
+	authed.Get("/:id/members", r.project.ListMembers)
 }

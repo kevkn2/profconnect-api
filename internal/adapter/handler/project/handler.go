@@ -7,16 +7,19 @@ import (
 
 // Handler aggregates HTTP handlers for shared project endpoints (browse/view).
 type Handler struct {
-	listProjectsUsecase port.Usecase[inputoutput.ListProjectsInput, inputoutput.ListProjectsOutput]
-	getProjectUsecase   port.Usecase[inputoutput.GetProjectInput, inputoutput.ProjectOutput]
+	listProjectsUsecase         port.Usecase[inputoutput.ListProjectsInput, inputoutput.ListProjectsOutput]
+	getProjectUsecase           port.Usecase[inputoutput.GetProjectInput, inputoutput.ProjectOutput]
+	listMembersByProjectUsecase port.Usecase[inputoutput.ListMembersByProjectInput, inputoutput.ListMembersOutput]
 }
 
 func New(
 	listProjectsUsecase port.Usecase[inputoutput.ListProjectsInput, inputoutput.ListProjectsOutput],
 	getProjectUsecase port.Usecase[inputoutput.GetProjectInput, inputoutput.ProjectOutput],
+	listMembersByProjectUsecase port.Usecase[inputoutput.ListMembersByProjectInput, inputoutput.ListMembersOutput],
 ) *Handler {
 	return &Handler{
-		listProjectsUsecase: listProjectsUsecase,
-		getProjectUsecase:   getProjectUsecase,
+		listProjectsUsecase:         listProjectsUsecase,
+		getProjectUsecase:           getProjectUsecase,
+		listMembersByProjectUsecase: listMembersByProjectUsecase,
 	}
 }

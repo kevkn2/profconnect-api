@@ -11,19 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const countApprovedApplications = `-- name: CountApprovedApplications :one
-SELECT COUNT(*) AS approved_count
-FROM project_applications
-WHERE project_id = $1 AND status = 'approved'
-`
-
-func (q *Queries) CountApprovedApplications(ctx context.Context, projectID uuid.UUID) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countApprovedApplications, projectID)
-	var approved_count int64
-	err := row.Scan(&approved_count)
-	return approved_count, err
-}
-
 const createProject = `-- name: CreateProject :one
 INSERT INTO projects (professor_id, title, description, slots, status)
 VALUES ($1, $2, $3, $4, $5)

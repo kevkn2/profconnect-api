@@ -63,8 +63,3 @@ UPDATE projects
 SET status = $1,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = $2;
-
--- name: CountApprovedApplications :one
-SELECT COUNT(*) AS approved_count
-FROM project_applications
-WHERE project_id = $1 AND status = 'approved';
