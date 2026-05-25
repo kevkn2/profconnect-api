@@ -475,6 +475,162 @@ fmt.Errorf("create user: %w", err)
 
 Domain & usecase tests must not use DB.
 
+### Tooling
+
+* Use the Go standard library `testing` package — no external assertion or
+  mocking framework.
+* Repository / port doubles live in [`internal/tests/mocks`](internal/tests/mocks).
+  Each mock exposes one function field per interface method, so individual
+  tests can override only the methods they exercise. Un-stubbed methods return
+  an "unimplemented" error to make accidental usage visible.
+* For asserting on returned `*domain.AppError` values, use
+  `utils.AssertAppErr(t, err, want)` from
+  [`internal/tests/utils`](internal/tests/utils) — it checks the error
+  type via `domain.IsAppError`.
+
+### Layout
+
+* Tests live under [`internal/tests`](internal/tests), grouped by domain into
+  one package per subfolder (`auth`, `professor`, `project`, `student`). Each
+  test file imports the usecase package it exercises (e.g.
+  `professor_usecase "profconnect-api/internal/usecase/professor"`) and drives
+  it through its exported constructor. Shared port mocks live at
+  [`internal/tests/mocks`](internal/tests/mocks); shared assertion helpers at
+  [`internal/tests/utils`](internal/tests/utils).
+  ```text
+  internal/tests/
+  ├── mocks/                       # hand-rolled port doubles
+  ├── utils/                       # AssertAppErr and other shared helpers
+  ├── auth/
+  │   ├── auth_login_test.go
+  │   ├── auth_refresh_test.go
+  │   ├── auth_register_core_test.go
+  │   ├── auth_register_admin_test.go
+  │   ├── auth_register_professor_test.go
+  │   └── auth_register_student_test.go
+  ├── professor/
+  │   ├── create_project_test.go
+  │   ├── list_applications_test.go
+  │   ├── list_invitations_test.go
+  │   ├── list_students_test.go
+  │   ├── professor_profile_test.go
+  │   ├── send_invitation_test.go
+  │   ├── cancel_invitation_test.go
+  │   ├── review_application_test.go
+  │   └── remove_member_test.go
+  ├── project/
+  │   ├── get_project_test.go
+  │   ├── list_projects_test.go
+  │   └── list_members_test.go
+  └── student/
+      ├── apply_project_test.go
+      ├── check_application_test.go
+      ├── my_applications_test.go
+      ├── list_my_invitations_test.go
+      ├── list_my_projects_test.go
+      ├── student_profile_test.go
+      ├── respond_invitation_test.go
+      ├── leave_project_test.go
+      └── withdraw_application_test.go
+  ```
+* Every usecase under [`internal/usecase/<domain>`](internal/usecase) has a
+  matching `<name>_test.go` file in `internal/tests/<domain>/`. When you add a
+  new usecase, drop a sibling test file into the matching domain folder.
+* Use `utils.AssertAppErr(t, err, want)` to verify a usecase mapped a
+  precondition to the expected `domain.ErrorType`.
+* Because tests are out-of-package, they can only touch the exported API of
+  each usecase. That's a feature — the same surface the rest of the app
+  consumes.
+* For usecases with several preconditions, use a table-driven `t.Run` for the
+  validation/rejection branches, and dedicated test functions for the
+  multi-step success paths.
+
+### Writing a usecase test
+
+1. Build a small fixtures helper (e.g. `sendInvitationFixtures()`) returning a
+   stock project, professor, and student — tests mutate fields as needed.
+2. Construct the mocks for the ports the usecase depends on.
+3. Stub only the methods the test cares about (the rest will panic / return
+   `unimplemented`, surfacing accidental coupling).
+4. Call `Execute(ctx, &input)` and assert on the output / error type.
+
+Example (abbreviated):
+
+```go
+package professor
+
+import (
+    "context"
+    "testing"
+
+    "profconnect-api/internal/domain/constants"
+    "profconnect-api/internal/domain/entities"
+    inputoutput "profconnect-api/internal/domain/input_output"
+    "profconnect-api/internal/tests/mocks"
+    professor_usecase "profconnect-api/internal/usecase/professor"
+)
+
+func TestSendInvitation_Success(t *testing.T) {
+    project, professor, student := sendInvitationFixtures()
+    projectRepo := &mocks.ProjectRepository{}
+    invRepo := &mocks.ProjectInvitationRepository{}
+    // ... other repos
+
+    projectRepo.GetByIDFn = func(_ context.Context, _ string) (*entities.Project, error) {
+        return project, nil
+    }
+    invRepo.CreateFn = func(_ context.Context, inv *entities.ProjectInvitation) (*entities.ProjectInvitation, error) {
+        return &entities.ProjectInvitation{ID: "inv-1", Status: inv.Status}, nil
+    }
+    // ... stub the rest
+
+    uc := professor_usecase.NewSendInvitationUsecase(projectRepo, invRepo, /* ... */)
+    out, err := uc.Execute(context.Background(), &inputoutput.SendInvitationInput{
+        ProfessorUserID: professor.User.ID,
+        ProjectID:       project.ID,
+        StudentID:       student.ID,
+    })
+    if err != nil {
+        t.Fatalf("unexpected error: %v", err)
+    }
+    if out.ID != "inv-1" {
+        t.Fatalf("unexpected output: %+v", out)
+    }
+}
+```
+
+### Running tests
+
+```bash
+# Run everything
+make test
+
+# Run every test package
+go test ./internal/tests/...
+
+# Run only one domain's tests
+go test ./internal/tests/professor/
+
+# Run a single test
+go test -run TestSendInvitation_Success ./internal/tests/professor/
+
+# Verbose output
+go test -v ./internal/tests/...
+```
+
+### What to cover
+
+For each new usecase, prioritise:
+
+* The happy path (writes happen, status transitions correctly).
+* Any side-effect that depends on the slot accounting (member created on
+  approve/accept; project closes when full; project reopens when a slot frees).
+* Each precondition branch that returns a `domain.AppError` (validation /
+  forbidden / not-found / conflict).
+
+Pure list/get usecases that are mostly straight-through don't need exhaustive
+coverage.
+
 ---
 
 ## General Principles
