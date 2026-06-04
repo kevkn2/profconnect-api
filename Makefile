@@ -1,7 +1,7 @@
 include .env
 export
 
-.PHONY: help build run dev migrate-up migrate-down migrate-create clean docker-up docker-down test
+.PHONY: help build build-seeder run run-seeder dev migrate-up migrate-down migrate-create clean docker-up docker-down test
 
 help:
 	@echo "Available commands:"
@@ -21,9 +21,15 @@ help:
 build:
 	go build -o .build/rest-api ./cmd/rest
 
+build-seeder:
+	go build -o .build/seeder ./cmd/seeder
+
 # Run
 run: build
 	./.build/rest-api
+
+run-seeder: build-seeder
+	./.build/seeder
 
 # Development with live reload
 dev:
